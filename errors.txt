@@ -1,89 +1,973 @@
-error[E0432]: unresolved imports `ml_kem::DecapsulationKey`, `ml_kem::EncapsulationKey`
- --> src/crypto.rs:6:14
-  |
-6 | use ml_kem::{DecapsulationKey, EncapsulationKey, KemCore, MlKem1024};
-  |              ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^ no `EncapsulationKey` in the root
-  |              |
-  |              no `DecapsulationKey` in the root
-  |
-help: a similar name exists in the module
-  |
-6 - use ml_kem::{DecapsulationKey, EncapsulationKey, KemCore, MlKem1024};
-6 + use ml_kem::{Decapsulate, EncapsulationKey, KemCore, MlKem1024};
-  |
-help: a similar name exists in the module
-  |
-6 - use ml_kem::{DecapsulationKey, EncapsulationKey, KemCore, MlKem1024};
-6 + use ml_kem::{DecapsulationKey, Encapsulate, KemCore, MlKem1024};
-  |
-error[E0432]: unresolved import `ml_kem::EncapsulationKey`
-   --> src/crypto.rs:231:9
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:38:18
     |
-231 |     use ml_kem::EncapsulationKey;
-    |         ^^^^^^^^^^^^^^^^^^^^^^^^ no `EncapsulationKey` in the root
+ 38 |     pub quantum: EncapsulationKey<MlKem1024>,
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
     |
-help: a similar name exists in the module
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
     |
-231 -     use ml_kem::EncapsulationKey;
-231 +     use ml_kem::Encapsulate;
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
     |
-error[E0282]: type annotations needed
-   --> src/crypto.rs:149:42
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:61:18
     |
-149 |     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-    |                                          ^^^^^^
+ 61 |     pub quantum: DecapsulationKey<MlKem1024>,
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
     |
-help: try using a fully qualified path to specify the expected types
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
     |
-149 -     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-149 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).into());
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::DecapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:25:8
     |
-error[E0282]: type annotations needed
-   --> src/crypto.rs:169:42
+ 23 | pub struct DecapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+ 24 | where
+ 25 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `DecapsulationKey`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:235:31
     |
-169 |     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-    |                                          ^^^^^^
+235 |     pub fn serialize<S>(key: &EncapsulationKey<MlKem1024>, serializer: S) -> Result<S::Ok, S::Error>
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
     |
-help: try using a fully qualified path to specify the expected types
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
     |
-169 -     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-169 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).into());
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
     |
-error[E0599]: the method `zeroize` exists for mutable reference `&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>`, but its trait bounds were not satisfied
-  --> src/state.rs:20:34
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:242:59
+    |
+242 |     pub fn deserialize<'de, D>(deserializer: D) -> Result<EncapsulationKey<MlKem1024>, D::Error>
+    |                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:38:5
+    |
+ 34 | #[derive(Clone, Serialize, Deserialize)]
+    |          ----- in this derive macro expansion
+...
+ 38 |     pub quantum: EncapsulationKey<MlKem1024>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:34:17
+    |
+ 34 | #[derive(Clone, Serialize, Deserialize)]
+    |                 ^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+    = note: this error originates in the derive macro `Serialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:34:28
+    |
+ 34 | #[derive(Clone, Serialize, Deserialize)]
+    |                            ^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:37:20
+    |
+ 37 |     #[serde(with = "serde_quantum_pubkey")]
+    |                    ^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0599]: no method named `as_bytes` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
+  --> src/crypto.rs:44:29
    |
-20 | #[derive(Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
-   |                                  ^^^^^^^ method cannot be called due to unsatisfied trait bounds
+44 |             && self.quantum.as_bytes() == other.quantum.as_bytes()
+   |                             ^^^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+
+error[E0599]: no method named `as_bytes` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
+  --> src/crypto.rs:44:57
+   |
+44 |             && self.quantum.as_bytes() == other.quantum.as_bytes()
+   |                                                         ^^^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+
+error[E0599]: no method named `as_bytes` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
+  --> src/crypto.rs:53:22
+   |
+53 |         self.quantum.as_bytes().hash(state);
+   |                      ^^^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+
+error[E0599]: the method `zeroize` exists for mutable reference `&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`, but its trait bounds were not satisfied
+  --> src/crypto.rs:58:10
+   |
+58 | #[derive(Zeroize, ZeroizeOnDrop)]
+   |          ^^^^^^^ method cannot be called due to unsatisfied trait bounds
+   |
+  ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:23:1
+   |
+23 | pub struct DecapsulationKey<P>
+   | ------------------------------ doesn't satisfy `_: DefaultIsZeroes` or `_: Zeroize`
    |
    = note: the following trait bounds were not satisfied:
-           `std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::DefaultIsZeroes`
-           which is required by `std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::Zeroize`
-           `&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::DefaultIsZeroes`
-           which is required by `&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::Zeroize`
+           `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::DefaultIsZeroes`
+           which is required by `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::Zeroize`
+           `&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::DefaultIsZeroes`
+           which is required by `&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::Zeroize`
    = note: this error originates in the derive macro `Zeroize` (in Nightly builds, run with -Z macro-backtrace for more info)
-error[E0599]: the method `zeroize_or_on_drop` exists for mutable reference `&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>`, but its trait bounds were not satisfied
-  --> src/state.rs:20:43
+
+error[E0599]: the method `zeroize_or_on_drop` exists for mutable reference `&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`, but its trait bounds were not satisfied
+  --> src/crypto.rs:58:19
    |
-20 | #[derive(Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
-   |                                           ^^^^^^^^^^^^^ method cannot be called due to unsatisfied trait bounds
+58 | #[derive(Zeroize, ZeroizeOnDrop)]
+   |                   ^^^^^^^^^^^^^ method cannot be called due to unsatisfied trait bounds
+   |
+  ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:23:1
+   |
+23 | pub struct DecapsulationKey<P>
+   | ------------------------------ doesn't satisfy `_: AssertZeroize`, `_: ZeroizeOnDrop` or `_: Zeroize`
    |
    = note: the following trait bounds were not satisfied:
-           `std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::Zeroize`
-           which is required by `std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::__internal::AssertZeroize`
-           `std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::ZeroizeOnDrop`
-           which is required by `&&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::__internal::AssertZeroizeOnDrop`
-           `&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::Zeroize`
-           which is required by `&mut std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>: zeroize::__internal::AssertZeroize`
+           `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::Zeroize`
+           which is required by `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::__internal::AssertZeroize`
+           `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::ZeroizeOnDrop`
+           which is required by `&&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::__internal::AssertZeroizeOnDrop`
+           `&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::Zeroize`
+           which is required by `&mut ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>: zeroize::__internal::AssertZeroize`
    = note: this error originates in the derive macro `ZeroizeOnDrop` (in Nightly builds, run with -Z macro-backtrace for more info)
-error: unused import: `Hasher`
- --> src/crypto.rs:9:23
-  |
-9 | use std::hash::{Hash, Hasher as _};
-  |                       ^^^^^^
-  |
-  = note: `-D unused-imports` implied by `-D warnings`
-  = help: to override `-D warnings` add `#[allow(unused_imports)]`
-Some errors have detailed explanations: E0282, E0432, E0599.
-For more information about an error, try `rustc --explain E0282`.
-error: could not compile `pq-aura` (lib) due to 7 previous errors
+
+error[E0308]: mismatched types
+  --> src/crypto.rs:76:22
+   |
+76 |             quantum: ml_pk,
+   |                      ^^^^^ expected `EncapsulationKey<Kem<MlKem1024Params>>`, found `DecapsulationKey<MlKem1024Params>`
+   |
+   = note: expected struct `ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+              found struct `ml_kem::kem::DecapsulationKey<ml_kem::MlKem1024Params>`
+
+error[E0308]: mismatched types
+  --> src/crypto.rs:80:22
+   |
+80 |             quantum: ml_sk,
+   |                      ^^^^^ expected `DecapsulationKey<Kem<MlKem1024Params>>`, found `EncapsulationKey<MlKem1024Params>`
+   |
+   = note: expected struct `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+              found struct `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:76:22
+    |
+ 76 |             quantum: ml_pk,
+    |                      ^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0599]: no method named `encapsulate` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
+   --> src/crypto.rs:106:49
+    |
+106 |     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
+    |                                                 ^^^^^^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+
+error[E0599]: no method named `decapsulate` found for struct `ml_kem::kem::DecapsulationKey<P>` in the current scope
+   --> src/crypto.rs:140:10
+    |
+138 |       let ml_shared = sk
+    |  _____________________-
+139 | |         .quantum
+140 | |         .decapsulate(&ml_ciphertext)
+    | |         -^^^^^^^^^^^ method not found in `ml_kem::kem::DecapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+    | |_________|
+    |
+
+error[E0282]: type annotations needed
+   --> src/crypto.rs:149:38
+    |
+149 |     let key_bytes: &[u8; 32] = key.0.as_ref().try_into().unwrap();
+    |                                      ^^^^^^
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+149 -     let key_bytes: &[u8; 32] = key.0.as_ref().try_into().unwrap();
+149 +     let key_bytes: &[u8; 32] = <[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).try_into().unwrap();
+    |
+
+error[E0282]: type annotations needed
+   --> src/crypto.rs:170:38
+    |
+170 |     let key_bytes: &[u8; 32] = key.0.as_ref().try_into().unwrap();
+    |                                      ^^^^^^
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+170 -     let key_bytes: &[u8; 32] = key.0.as_ref().try_into().unwrap();
+170 +     let key_bytes: &[u8; 32] = <[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).try_into().unwrap();
+    |
+
+error[E0599]: no method named `as_bytes` found for reference `&ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>` in the current scope
+   --> src/crypto.rs:239:13
+    |
+239 |         key.as_bytes().serialize(serializer)
+    |             ^^^^^^^^ method not found in `&ml_kem::kem::EncapsulationKey<ml_kem::kem::Kem<ml_kem::MlKem1024Params>>`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:246:21
+    |
+246 |         let bytes = Vec::<u8>::deserialize(deserializer)?;
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::PkeParams`
+    = note: required for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>` to implement `ml_kem::param::KemParams`
+note: required by a bound in `ml_kem::kem::EncapsulationKey`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:149:8
+    |
+147 | pub struct EncapsulationKey<P>
+    |            ---------------- required by a bound in this struct
+148 | where
+149 |     P: KemParams,
+    |        ^^^^^^^^^ required by this bound in `EncapsulationKey`
+
+error[E0599]: no function or associated item named `from_bytes` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
+   --> src/crypto.rs:251:30
+    |
+251 |         Ok(EncapsulationKey::from_bytes(array))
+    |                              ^^^^^^^^^^ function or associated item not found in `ml_kem::kem::EncapsulationKey<_>`
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `as_bytes` with a similar name, but with different arguments
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:92:5
+    |
+ 92 |     fn as_bytes(&self) -> Encoded<Self>;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `EncodedSizeUser` which provides `from_bytes` is implemented but not in scope; perhaps you want to import it
+    |
+232 +     use ml_kem::EncodedSizeUser;
+    |
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/crypto.rs:34:28
+    |
+ 34 | #[derive(Clone, Serialize, Deserialize)]
+    |                            ^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:10:21
+    |
+ 10 | #[derive(Serialize, Deserialize, Clone)]
+    |                     ^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:10:34
+    |
+ 10 | #[derive(Serialize, Deserialize, Clone)]
+    |                                  ^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:12:5
+    |
+ 10 | #[derive(Serialize, Deserialize, Clone)]
+    |                                  ----- in this derive macro expansion
+ 11 | pub struct Header {
+ 12 |     pub dh_pk: HybridPublicKey,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:55:13
+    |
+ 55 |         let header = Header {
+    |             ^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:56:20
+    |
+ 56 |             dh_pk: state.dh_pk.clone(),
+    |                    ^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:90:14
+    |
+ 90 |         let (header, is_new_ratchet) = Self::trial_decrypt_header(state, message, ad)?;
+    |              ^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:90:40
+    |
+ 90 |         let (header, is_new_ratchet) = Self::trial_decrypt_header(state, message, ad)?;
+    |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:90:40
+    |
+ 90 |         let (header, is_new_ratchet) = Self::trial_decrypt_header(state, message, ad)?;
+    |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:122:10
+    |
+122 |     ) -> Result<(Header, bool), &'static str> {
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:130:37
+    |
+130 |                 if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
+    |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:130:27
+    |
+130 |                 if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
+    |                           ^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:131:31
+    |
+131 |                     return Ok((header, false));
+    |                               ^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:163:25
+    |
+163 |                 .insert((state.remote_dh_pk.clone(), chain.index), msg_key);
+    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:163:26
+    |
+163 |                 .insert((state.remote_dh_pk.clone(), chain.index), msg_key);
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:190:30
+    |
+190 |         state.remote_dh_pk = header.dh_pk.clone();
+    |                              ^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:215:22
+    |
+215 |         let (new_pk, new_sk) = crypto::generate_hybrid_keypair(&mut rng);
+    |                      ^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:215:32
+    |
+215 |         let (new_pk, new_sk) = crypto::generate_hybrid_keypair(&mut rng);
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/ratchet.rs:217:23
+    |
+217 |         state.dh_sk = Some(new_sk);
+    |                       ^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:20:21
+    |
+ 20 | #[derive(Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+    |                     ^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:59:10
+    |
+ 59 |     ) -> Self {
+    |          ^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:56:9
+    |
+ 56 |         remote_pk: HybridPublicKey,
+    |         ^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:58:9
+    |
+ 58 |         local_sk: HybridSecretKey,
+    |         ^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:62:20
+    |
+ 62 |             dh_sk: Some(local_sk),
+    |                    ^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:71:31
+    |
+ 71 |             skipped_msg_keys: HashMap::new(),
+    |                               ^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:80:10
+    |
+ 80 |     ) -> Self {
+    |          ^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:78:9
+    |
+ 78 |         local_pk: HybridPublicKey,
+    |         ^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:79:9
+    |
+ 79 |         local_sk: HybridSecretKey,
+    |         ^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:83:20
+    |
+ 83 |             dh_sk: Some(local_sk),
+    |                    ^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::ParameterSet` is not satisfied
+   --> src/state.rs:93:31
+    |
+ 93 |             skipped_msg_keys: HashMap::new(),
+    |                               ^^^^^^^^^^^^^^ the trait `ml_kem::ParameterSet` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::ParameterSet`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:156:1
+    |
+156 | impl ParameterSet for MlKem512Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem512Params`
+...
+169 | impl ParameterSet for MlKem768Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem768Params`
+...
+182 | impl ParameterSet for MlKem1024Params {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `ml_kem::MlKem1024Params`
+
+Some errors have detailed explanations: E0277, E0282, E0308, E0599.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `pq-aura` (lib) due to 53 previous errors
 Error: Process completed with exit code 101.
