@@ -48,7 +48,9 @@ pub struct HybridSecretKey {
 }
 
 /// Generates a new Hybrid Keypair.
-pub fn generate_hybrid_keypair<R: RngCore + CryptoRng>(rng: &mut R) -> (HybridPublicKey, HybridSecretKey) {
+pub fn generate_hybrid_keypair<R: RngCore + CryptoRng>(
+    rng: &mut R,
+) -> (HybridPublicKey, HybridSecretKey) {
     let x_secret = XStaticSecret::random_from_rng(rng);
     let x_public = XPublicKey::from(&x_secret);
 
@@ -115,14 +117,17 @@ pub fn hybrid_decapsulate(
     // Split ciphertext into X25519 public key and ML-KEM ciphertext
     let (x_public_bytes, ml_ciphertext_bytes) = ciphertext.split_at(32);
     let ephemeral_x_public = XPublicKey::from(<[u8; 32]>::try_from(x_public_bytes).unwrap());
-    
+
     // X25519 exchange
     let x_shared = sk.classic.diffie_hellman(&ephemeral_x_public);
 
     // ML-KEM-1024 decapsulation
     let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024>::try_from(ml_ciphertext_bytes)
         .map_err(|_| "Invalid ML-KEM ciphertext")?;
-    let ml_shared = sk.quantum.decapsulate(&ml_ciphertext).map_err(|_| "Decapsulation failed")?;
+    let ml_shared = sk
+        .quantum
+        .decapsulate(&ml_ciphertext)
+        .map_err(|_| "Decapsulation failed")?;
 
     // Combine secrets
     Ok(combine_secrets(x_shared.as_bytes(), ml_shared.as_ref()))
@@ -132,15 +137,34 @@ pub fn hybrid_decapsulate(
 pub fn encrypt(key: &SecretKeyMaterial, nonce: &[u8; 12], ad: &[u8], plaintext: &[u8]) -> Vec<u8> {
     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
     let nonce = Nonce::from_slice(nonce);
-    cipher.encrypt(nonce, aes_gcm_siv::aead::Payload { msg: plaintext, aad: ad })
+    cipher
+        .encrypt(
+            nonce,
+            aes_gcm_siv::aead::Payload {
+                msg: plaintext,
+                aad: ad,
+            },
+        )
         .expect("Encryption failed")
 }
 
 /// Decrypts a message using AES-256-GCM-SIV.
-pub fn decrypt(key: &SecretKeyMaterial, nonce: &[u8; 12], ad: &[u8], ciphertext: &[u8]) -> Result<Vec<u8>, &'static str> {
+pub fn decrypt(
+    key: &SecretKeyMaterial,
+    nonce: &[u8; 12],
+    ad: &[u8],
+    ciphertext: &[u8],
+) -> Result<Vec<u8>, &'static str> {
     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
     let nonce = Nonce::from_slice(nonce);
-    cipher.decrypt(nonce, aes_gcm_siv::aead::Payload { msg: ciphertext, aad: ad })
+    cipher
+        .decrypt(
+            nonce,
+            aes_gcm_siv::aead::Payload {
+                msg: ciphertext,
+                aad: ad,
+            },
+        )
         .map_err(|_| "Decryption failed")
 }
 
@@ -150,15 +174,18 @@ pub fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
 }
 
 /// KDF for generating new keys from a root key.
-pub fn kdf_step(root_key: &SecretKeyMaterial, info: &[u8]) -> (SecretKeyMaterial, SecretKeyMaterial) {
+pub fn kdf_step(
+    root_key: &SecretKeyMaterial,
+    info: &[u8],
+) -> (SecretKeyMaterial, SecretKeyMaterial) {
     let hk = Hkdf::<blake3::Hasher>::new(None, root_key.as_ref());
     let mut okm = [0u8; 64];
     hk.expand(info, &mut okm).expect("HKDF expansion failed");
-    
+
     let (new_root, new_chain) = okm.split_at(32);
     (
         SecretKeyMaterial(<[u8; 32]>::try_from(new_root).unwrap()),
-        SecretKeyMaterial(<[u8; 32]>::try_from(new_chain).unwrap())
+        SecretKeyMaterial(<[u8; 32]>::try_from(new_chain).unwrap()),
     )
 }
 
@@ -177,7 +204,9 @@ mod serde_bytes_fixed {
         D: Deserializer<'de>,
     {
         let vec = Vec::<u8>::deserialize(deserializer)?;
-        let array = vec.try_into().map_err(|_| serde::de::Error::custom("Expected 32 bytes"))?;
+        let array = vec
+            .try_into()
+            .map_err(|_| serde::de::Error::custom("Expected 32 bytes"))?;
         Ok(array)
     }
 }

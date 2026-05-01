@@ -21,18 +21,18 @@ pub struct HeaderChain {
 pub struct RatchetState {
     /// Root key used to derive chain keys.
     pub root_key: SecretKeyMaterial,
-    
+
     /// The current hybrid keypair for the DH ratchet.
     #[serde(skip)]
     pub dh_sk: Option<HybridSecretKey>,
     pub dh_pk: HybridPublicKey,
-    
+
     /// The remote party's current hybrid public key.
     pub remote_dh_pk: HybridPublicKey,
-    
+
     /// Sending chain state.
     pub send_chain: Option<ChainState>,
-    
+
     /// Receiving chain state.
     pub recv_chain: Option<ChainState>,
 
@@ -40,10 +40,10 @@ pub struct RatchetState {
     pub send_header_chain: Option<HeaderChain>,
     pub recv_header_chain: Option<HeaderChain>,
     pub next_recv_header_chain: Option<HeaderChain>,
-    
+
     /// Previous sending chain length.
     pub prev_send_len: u32,
-    
+
     /// Skipped message keys for handling out-of-order messages.
     pub skipped_msg_keys: HashMap<(HybridPublicKey, u32), SecretKeyMaterial>,
 }
@@ -82,7 +82,7 @@ impl RatchetState {
             dh_sk: Some(local_sk),
             dh_pk: local_pk,
             // Remote PK will be set on the first message
-            remote_dh_pk: unsafe { std::mem::zeroed() }, 
+            remote_dh_pk: unsafe { std::mem::zeroed() },
             send_chain: None,
             recv_chain: None,
             send_header_chain: None,
