@@ -11,7 +11,7 @@ pub struct ChainState {
 }
 
 /// State for Header Encryption chains.
-#[derive(Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
+#[derive(Serialize, Deserialize, Zeroize, ZeroizeOnDrop, Clone)]
 pub struct HeaderChain {
     pub key: SecretKeyMaterial,
     pub index: u32,
@@ -29,7 +29,7 @@ pub struct RatchetState {
     pub dh_pk: HybridPublicKey,
 
     /// The remote party's current hybrid public key.
-    pub remote_dh_pk: HybridPublicKey,
+    pub remote_dh_pk: Option<HybridPublicKey>,
 
     /// Sending chain state.
     pub send_chain: Option<ChainState>,
@@ -61,16 +61,17 @@ impl RatchetState {
         local_pk: HybridPublicKey,
         local_sk: HybridSecretKey,
     ) -> Self {
+        let (h_key, _) = crate::crypto::kdf_step(&root_key, b"Initial Header Key");
         Self {
             root_key,
             dh_sk: Some(local_sk),
             dh_pk: local_pk,
-            remote_dh_pk: remote_pk,
+            remote_dh_pk: Some(remote_pk),
             send_chain: None,
             recv_chain: None,
             send_header_chain: None,
             recv_header_chain: None,
-            next_recv_header_chain: None,
+            next_recv_header_chain: Some(HeaderChain { key: h_key, index: 0 }),
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
             pending_kem_ciphertext: Vec::new(),
@@ -83,17 +84,18 @@ impl RatchetState {
         local_pk: HybridPublicKey,
         local_sk: HybridSecretKey,
     ) -> Self {
+        let (h_key, _) = crate::crypto::kdf_step(&root_key, b"Initial Header Key");
         Self {
             root_key,
             dh_sk: Some(local_sk),
             dh_pk: local_pk,
             // Remote PK will be set on the first message
-            remote_dh_pk: unsafe { std::mem::zeroed() },
+            remote_dh_pk: None,
             send_chain: None,
             recv_chain: None,
             send_header_chain: None,
             recv_header_chain: None,
-            next_recv_header_chain: None,
+            next_recv_header_chain: Some(HeaderChain { key: h_key, index: 0 }),
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
             pending_kem_ciphertext: Vec::new(),

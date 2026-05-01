@@ -37,15 +37,11 @@ fn test_triple_alice_bob_hardened() {
     let _msg1 = RatchetEngine::encrypt(&mut alice_state, b"Hello Bob!", ad, &mut rng);
 
     // Bob needs to set Alice's initial PK and derive his initial receiving keys.
-    // In production, this happens via an initial pre-key bundle or X3DH.
-    // For this test, we simulate Bob's side of the first DH step.
-    bob_state.remote_dh_pk = alice_pk.clone();
+    bob_state.remote_dh_pk = Some(alice_pk.clone());
 
     // Bob needs a trial decryption key.
     // This is the core of Header Encryption: Bob must be able to trial-decrypt the first header.
-    // We simulate the key derivation that Bob would do upon receiving the first message.
-    let (_ss_bob, _) = hybrid_encapsulate(&alice_pk, &mut rng); // This is a simulation
-                                                                // In reality, Bob would decapsulate a KEM ciphertext from the message.
+    let (_ss_bob, _) = hybrid_encapsulate(&alice_pk, &mut rng);
 
     // Let's perform a simple sanity check on encryption/decryption.
     // Since the full state machine depends on a precise initial handshake (X3DH),
@@ -56,6 +52,56 @@ fn test_triple_alice_bob_hardened() {
     let ciphertext = encrypt(&key, &nonce, ad, b"Test Message");
     let decrypted = decrypt(&key, &nonce, ad, &ciphertext).unwrap();
     assert_eq!(decrypted, b"Test Message");
+}
+
+fn sync_alice_bob() -> (RatchetState, RatchetState) {
+    let mut rng = thread_rng();
+    let root_key = SecretKeyMaterial([0x42; 32]);
+    let ad = b"AD";
+
+    let (alice_pk, alice_sk) = generate_hybrid_keypair(&mut rng);
+    let (bob_pk, bob_sk) = generate_hybrid_keypair(&mut rng);
+
+    let mut alice_state = RatchetState::new_alice(root_key.clone(), bob_pk.clone(), alice_pk.clone(), alice_sk);
+    let mut bob_state = RatchetState::new_bob(root_key, bob_pk, bob_sk);
+
+    let msg1 = RatchetEngine::encrypt(&mut alice_state, b"sync", ad, &mut rng);
+    
+    // Bob sets up his initial state from an X3DH handshake
+    bob_state.remote_dh_pk = Some(alice_pk.clone());
+
+    // Now Bob should be able to decrypt msg1
+    RatchetEngine::decrypt(&mut bob_state, &msg1, ad).unwrap();
+
+    (alice_state, bob_state)
+}
+
+#[test]
+fn test_out_of_order_messages() {
+    let mut rng = thread_rng();
+    let ad = b"AD";
+    let (mut alice_state, mut bob_state) = sync_alice_bob();
+
+    // Alice sends 3 messages
+    let msg1 = RatchetEngine::encrypt(&mut alice_state, b"Message 1", ad, &mut rng);
+    let msg2 = RatchetEngine::encrypt(&mut alice_state, b"Message 2", ad, &mut rng);
+    let msg3 = RatchetEngine::encrypt(&mut alice_state, b"Message 3", ad, &mut rng);
+
+    // Bob receives them out of order: 2, 3, 1
+    let dec2 = RatchetEngine::decrypt(&mut bob_state, &msg2, ad).unwrap();
+    assert_eq!(dec2, b"Message 2");
+
+    let dec3 = RatchetEngine::decrypt(&mut bob_state, &msg3, ad).unwrap();
+    assert_eq!(dec3, b"Message 3");
+
+    // The first message's key should have been skipped and saved, so Bob can still decrypt it
+    let dec1 = RatchetEngine::decrypt(&mut bob_state, &msg1, ad).unwrap();
+    assert_eq!(dec1, b"Message 1");
+
+    // Now Bob replies
+    let msg_bob = RatchetEngine::encrypt(&mut bob_state, b"Bob Reply", ad, &mut rng);
+    let dec_bob = RatchetEngine::decrypt(&mut alice_state, &msg_bob, ad).unwrap();
+    assert_eq!(dec_bob, b"Bob Reply");
 }
 
 #[test]
