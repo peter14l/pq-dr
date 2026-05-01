@@ -1,195 +1,62 @@
-error[E0603]: trait `Decapsulate` is private
-  --> src/crypto.rs:7:51
-   |
- 7 |     kem::DecapsulationKey, kem::EncapsulationKey, Decapsulate, Encapsulate, KemCore, MlKem1024,
-   |                                                   ^^^^^^^^^^^ private trait
-   |
-note: the trait `Decapsulate` is defined here
-  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:68:13
-   |
-68 | use ::kem::{Decapsulate, Encapsulate};
-   |             ^^^^^^^^^^^
-help: import `Decapsulate` directly
-   |
- 7 |     kem::DecapsulationKey, kem::EncapsulationKey, kem::Decapsulate, Encapsulate, KemCore, MlKem1024,
-   |                                                   +++++
-
-error[E0603]: trait `Encapsulate` is private
-  --> src/crypto.rs:7:64
-   |
- 7 |     kem::DecapsulationKey, kem::EncapsulationKey, Decapsulate, Encapsulate, KemCore, MlKem1024,
-   |                                                                ^^^^^^^^^^^ private trait
-   |
-note: the trait `Encapsulate` is defined here
-  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:68:26
-   |
-68 | use ::kem::{Decapsulate, Encapsulate};
-   |                          ^^^^^^^^^^^
-help: import `Encapsulate` directly
-   |
- 7 |     kem::DecapsulationKey, kem::EncapsulationKey, Decapsulate, kem::Encapsulate, KemCore, MlKem1024,
-   |                                                                +++++
-
-error[E0599]: no method named `as_ref` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
-  --> src/crypto.rs:47:29
-   |
-47 |             && self.quantum.as_ref() == other.quantum.as_ref()
-   |                             ^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
-
-error[E0599]: no method named `as_ref` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
-  --> src/crypto.rs:47:55
-   |
-47 |             && self.quantum.as_ref() == other.quantum.as_ref()
-   |                                                       ^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
-
-error[E0599]: no method named `as_ref` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
-  --> src/crypto.rs:56:22
-   |
-56 |         self.quantum.as_ref().hash(state);
-   |                      ^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
-
-error[E0308]: mismatched types
-  --> src/crypto.rs:93:22
-   |
-93 |             quantum: ml_pk,
-   |                      ^^^^^ expected `EncapsulationKey<MlKem1024Params>`, found `DecapsulationKey<MlKem1024Params>`
-   |
-   = note: expected struct `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
-              found struct `ml_kem::kem::DecapsulationKey<ml_kem::MlKem1024Params>`
-
-error[E0308]: mismatched types
-  --> src/crypto.rs:97:22
-   |
-97 |             quantum: ml_sk,
-   |                      ^^^^^ expected `DecapsulationKey<MlKem1024Params>`, found `EncapsulationKey<MlKem1024Params>`
-   |
-   = note: expected struct `ml_kem::kem::DecapsulationKey<ml_kem::MlKem1024Params>`
-              found struct `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
-
-error[E0599]: no method named `encapsulate` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
-   --> src/crypto.rs:123:49
-    |
-123 |     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
-    |                                                 ^^^^^^^^^^^ method not found in `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`
-    |
-   ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/kem-0.3.0-pre.0/src/lib.rs:23:8
-    |
- 23 |     fn encapsulate(&self, rng: &mut impl CryptoRngCore) -> Result<(EK, SS), Self::Error>;
-    |        ----------- the method is available for `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>` here
-    |
-    = help: items from traits can only be used if the trait is in scope
-help: trait `Encapsulate` which provides `encapsulate` is implemented but not in scope; perhaps you want to import it
-    |
-  1 + use ml_kem::kem::Encapsulate;
-    |
-
-error[E0277]: the trait bound `ml_kem::MlKem1024Params: ml_kem::KemCore` is not satisfied
-   --> src/crypto.rs:153:25
-    |
-153 |     let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024Params>::try_from(ml_ciphertext_bytes)
-    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::KemCore` is not implemented for `ml_kem::MlKem1024Params`
-    |
-help: the trait `ml_kem::KemCore` is implemented for `ml_kem::kem::Kem<P>`
-   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:228:1
-    |
-228 | / impl<P> crate::KemCore for Kem<P>
-229 | | where
-230 | |     P: KemParams,
-    | |_________________^
-
-error[E0277]: the trait bound `ml_kem::MlKem1024Params: ml_kem::KemCore` is not satisfied
-   --> src/crypto.rs:153:25
-    |
-153 |     let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024Params>::try_from(ml_ciphertext_bytes)
-    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::KemCore` is not implemented for `ml_kem::MlKem1024Params`
-    |
-help: the trait `ml_kem::KemCore` is implemented for `ml_kem::kem::Kem<P>`
-   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:228:1
-    |
-228 | / impl<P> crate::KemCore for Kem<P>
-229 | | where
-230 | |     P: KemParams,
-    | |_________________^
-
-error[E0599]: no method named `decapsulate` found for struct `ml_kem::kem::DecapsulationKey<P>` in the current scope
-   --> src/crypto.rs:157:10
-    |
-155 |       let ml_shared = sk
-    |  _____________________-
-156 | |         .quantum
-157 | |         .decapsulate(&ml_ciphertext)
-    | |         -^^^^^^^^^^^ method not found in `ml_kem::kem::DecapsulationKey<ml_kem::MlKem1024Params>`
-    | |_________|
-    |
-    |
-   ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/kem-0.3.0-pre.0/src/lib.rs:34:8
-    |
- 34 |       fn decapsulate(&self, encapsulated_key: &EK) -> Result<SS, Self::Error>;
-    |          ----------- the method is available for `ml_kem::kem::DecapsulationKey<ml_kem::MlKem1024Params>` here
-    |
-    = help: items from traits can only be used if the trait is in scope
-help: trait `Decapsulate` which provides `decapsulate` is implemented but not in scope; perhaps you want to import it
-    |
-  1 + use ml_kem::kem::Decapsulate;
-    |
-
 error[E0282]: type annotations needed
-   --> src/crypto.rs:166:42
+   --> src/crypto.rs:169:46
     |
-166 |     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-    |                                          ^^^^^^
+169 |     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+    |                                              ^^^^^^
     |
 help: try using a fully qualified path to specify the expected types
     |
-166 -     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-166 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).into());
+169 -     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+169 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key_bytes).into());
     |
 
 error[E0282]: type annotations needed
-   --> src/crypto.rs:186:42
+   --> src/crypto.rs:190:46
     |
-186 |     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-    |                                          ^^^^^^
+190 |     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+    |                                              ^^^^^^
     |
 help: try using a fully qualified path to specify the expected types
     |
-186 -     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
-186 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).into());
+190 -     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+190 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key_bytes).into());
     |
 
-error[E0599]: the method `as_ref` exists for reference `&ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>`, but its trait bounds were not satisfied
-   --> src/crypto.rs:257:13
-    |
-257 |         key.as_ref().serialize(serializer)
-    |             ^^^^^^ method cannot be called due to unsatisfied trait bounds
-    |
-   ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:147:1
-    |
-147 | pub struct EncapsulationKey<P>
-    | ------------------------------ doesn't satisfy `_: AsRef<_>`
-    |
-    = note: the following trait bounds were not satisfied:
-            `ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>: std::convert::AsRef<_>`
-            which is required by `&ml_kem::kem::EncapsulationKey<ml_kem::MlKem1024Params>: std::convert::AsRef<_>`
+error[E0382]: borrow of moved value: `rng`
+  --> src/crypto.rs:90:46
+   |
+81 |     rng: &mut R,
+   |     --- move occurs because `rng` has type `&mut R`, which does not implement the `Copy` trait
+82 | ) -> (HybridPublicKey, HybridSecretKey) {
+83 |     let x_secret = XStaticSecret::random_from_rng(rng);
+   |                                                   --- value moved here
+...
+90 |     let (ml_sk, ml_pk) = MlKem1024::generate(rng);
+   |                                              ^^^ value borrowed here after move
+   |
+help: consider creating a fresh reborrow of `rng` here
+   |
+83 |     let x_secret = XStaticSecret::random_from_rng(&mut *rng);
+   |                                                   ++++++
 
-error[E0599]: no function or associated item named `from_bytes` found for struct `ml_kem::kem::EncapsulationKey<P>` in the current scope
-   --> src/crypto.rs:271:30
+error[E0382]: borrow of moved value: `rng`
+   --> src/crypto.rs:125:61
     |
-271 |         Ok(EncapsulationKey::from_bytes(array))
-    |                              ^^^^^^^^^^ function or associated item not found in `ml_kem::kem::EncapsulationKey<_>`
+117 |     rng: &mut R,
+    |     --- move occurs because `rng` has type `&mut R`, which does not implement the `Copy` trait
+...
+120 |     let ephemeral_x_secret = XStaticSecret::random_from_rng(rng);
+    |                                                             --- value moved here
+...
+125 |     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
+    |                                                             ^^^ value borrowed here after move
     |
-    = help: items from traits can only be used if the trait is in scope
-help: there is a method `as_bytes` with a similar name, but with different arguments
-   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:92:5
+help: consider creating a fresh reborrow of `rng` here
     |
- 92 |     fn as_bytes(&self) -> Encoded<Self>;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-help: trait `EncodedSizeUser` which provides `from_bytes` is implemented but not in scope; perhaps you want to import it
-    |
-247 +     use ml_kem::EncodedSizeUser;
-    |
+120 |     let ephemeral_x_secret = XStaticSecret::random_from_rng(&mut *rng);
+    |                                                             ++++++
 
-Some errors have detailed explanations: E0277, E0282, E0308, E0599, E0603.
-For more information about an error, try `rustc --explain E0277`.
-error: could not compile `pq-aura` (lib) due to 15 previous errors
+Some errors have detailed explanations: E0282, E0382.
+For more information about an error, try `rustc --explain E0282`.
+error: could not compile `pq-aura` (lib) due to 4 previous errors
 Error: Process completed with exit code 101.

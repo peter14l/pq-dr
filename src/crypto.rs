@@ -66,7 +66,6 @@ pub struct HybridSecretKey {
 impl Zeroize for HybridSecretKey {
     fn zeroize(&mut self) {
         self.classic.zeroize();
-        // DecapsulationKey doesn't implement Zeroize, but we ensure classical is wiped.
     }
 }
 
@@ -80,13 +79,9 @@ impl Drop for HybridSecretKey {
 pub fn generate_hybrid_keypair<R: RngCore + CryptoRng>(
     rng: &mut R,
 ) -> (HybridPublicKey, HybridSecretKey) {
-    let x_secret = XStaticSecret::random_from_rng(rng);
+    let x_secret = XStaticSecret::random_from_rng(&mut *rng);
     let x_public = XPublicKey::from(&x_secret);
 
-    // According to compiler: generate returns (EncapsulationKey, DecapsulationKey)
-    // but assignment was swapped? Let's check the error again.
-    // "expected EncapsulationKey, found DecapsulationKey" for quantum: ml_pk
-    // This means ml_pk is DecapsulationKey. So MlKem1024::generate returns (SK, PK).
     let (ml_sk, ml_pk) = MlKem1024::generate(rng);
 
     (
@@ -116,18 +111,14 @@ pub fn hybrid_encapsulate<R: RngCore + CryptoRng>(
     pk: &HybridPublicKey,
     rng: &mut R,
 ) -> (SecretKeyMaterial, Vec<u8>) {
-    // X25519 ephemeral exchange
-    let ephemeral_x_secret = XStaticSecret::random_from_rng(rng);
+    let ephemeral_x_secret = XStaticSecret::random_from_rng(&mut *rng);
     let ephemeral_x_public = XPublicKey::from(&ephemeral_x_secret);
     let x_shared = ephemeral_x_secret.diffie_hellman(&pk.classic);
 
-    // ML-KEM-1024 encapsulation
     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
 
-    // Combine secrets
     let shared_secret = combine_secrets(x_shared.as_bytes(), ml_shared.as_ref());
 
-    // Ciphertext contains both the X25519 ephemeral public key and the ML-KEM ciphertext
     let mut ciphertext = Vec::new();
     ciphertext.extend_from_slice(ephemeral_x_public.as_bytes());
     ciphertext.extend_from_slice(ml_ciphertext.as_ref());
@@ -144,29 +135,24 @@ pub fn hybrid_decapsulate(
         return Err("Invalid ciphertext length");
     }
 
-    // Split ciphertext into X25519 public key and ML-KEM ciphertext
     let (x_public_bytes, ml_ciphertext_bytes) = ciphertext.split_at(32);
     let ephemeral_x_public = XPublicKey::from(<[u8; 32]>::try_from(x_public_bytes).unwrap());
 
-    // X25519 exchange
     let x_shared = sk.classic.diffie_hellman(&ephemeral_x_public);
 
-    // ML-KEM-1024 decapsulation
-    let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024>::try_from(ml_ciphertext_bytes)
+    let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024Params>::try_from(ml_ciphertext_bytes)
         .map_err(|_| "Invalid ML-KEM ciphertext")?;
     let ml_shared = sk
         .quantum
         .decapsulate(&ml_ciphertext)
         .map_err(|_| "Decapsulation failed")?;
 
-    // Combine secrets
     Ok(combine_secrets(x_shared.as_bytes(), ml_shared.as_ref()))
 }
 
 /// Encrypts a message using AES-256-GCM-SIV.
 pub fn encrypt(key: &SecretKeyMaterial, nonce: &[u8; 12], ad: &[u8], plaintext: &[u8]) -> Vec<u8> {
-    let key_bytes: [u8; 32] = key.0;
-    let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+    let cipher = Aes256GcmSiv::new((&key.0).into());
     let nonce = Nonce::from_slice(nonce);
     cipher
         .encrypt(
@@ -186,8 +172,7 @@ pub fn decrypt(
     ad: &[u8],
     ciphertext: &[u8],
 ) -> Result<Vec<u8>, &'static str> {
-    let key_bytes: [u8; 32] = key.0;
-    let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+    let cipher = Aes256GcmSiv::new((&key.0).into());
     let nonce = Nonce::from_slice(nonce);
     cipher
         .decrypt(
