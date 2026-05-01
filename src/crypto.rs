@@ -115,7 +115,7 @@ pub fn hybrid_encapsulate<R: RngCore + CryptoRng>(
     let ephemeral_x_public = XPublicKey::from(&ephemeral_x_secret);
     let x_shared = ephemeral_x_secret.diffie_hellman(&pk.classic);
 
-    let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
+    let (ml_ciphertext, ml_shared) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
 
     let shared_secret = combine_secrets(x_shared.as_bytes(), ml_shared.as_ref());
 

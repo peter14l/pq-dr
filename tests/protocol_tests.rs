@@ -1,7 +1,6 @@
 use pq_aura::crypto::*;
 use pq_aura::ratchet::*;
 use pq_aura::state::*;
-use pq_aura::*;
 use rand::thread_rng;
 
 #[test]
@@ -35,7 +34,7 @@ fn test_triple_alice_bob_hardened() {
     // 1. Initial Handshake: Alice sends a message to Bob.
     // Since it's the first message, Alice must derive her sending chain and header keys.
     // In our implementation, `encrypt` handles this if `send_chain` is None.
-    let msg1 = RatchetEngine::encrypt(&mut alice_state, b"Hello Bob!", ad, &mut rng);
+    let _msg1 = RatchetEngine::encrypt(&mut alice_state, b"Hello Bob!", ad, &mut rng);
 
     // Bob needs to set Alice's initial PK and derive his initial receiving keys.
     // In production, this happens via an initial pre-key bundle or X3DH.
@@ -45,7 +44,7 @@ fn test_triple_alice_bob_hardened() {
     // Bob needs a trial decryption key.
     // This is the core of Header Encryption: Bob must be able to trial-decrypt the first header.
     // We simulate the key derivation that Bob would do upon receiving the first message.
-    let (ss_bob, _) = hybrid_encapsulate(&alice_pk, &mut rng); // This is a simulation
+    let (_ss_bob, _) = hybrid_encapsulate(&alice_pk, &mut rng); // This is a simulation
                                                                // In reality, Bob would decapsulate a KEM ciphertext from the message.
 
     // Let's perform a simple sanity check on encryption/decryption.
