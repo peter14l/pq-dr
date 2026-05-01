@@ -260,3 +260,32 @@ mod serde_quantum_pubkey {
         Ok(EncapsulationKey::from_bytes(array))
     }
 }
+
+pub mod serde_quantum_secretkey {
+    use super::*;
+    use ml_kem::kem::DecapsulationKey;
+
+    pub fn serialize<S>(
+        key: &DecapsulationKey<MlKem1024Params>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        key.as_bytes().serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(
+        deserializer: D,
+    ) -> Result<DecapsulationKey<MlKem1024Params>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bytes = Vec::<u8>::deserialize(deserializer)?;
+        let array = bytes
+            .as_slice()
+            .try_into()
+            .map_err(|_| serde::de::Error::custom("Invalid length"))?;
+        Ok(DecapsulationKey::from_bytes(array))
+    }
+}

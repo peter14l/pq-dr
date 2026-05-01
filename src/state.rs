@@ -99,6 +99,32 @@ impl RatchetState {
             pending_kem_ciphertext: Vec::new(),
         }
     }
+
+    /// Exports the state securely by encrypting it with a provided symmetric key.
+    pub fn export_state(
+        &self,
+        encryption_key: &SecretKeyMaterial,
+        nonce: &[u8; 12],
+    ) -> Result<Vec<u8>, &'static str> {
+        let serialized = serde_json::to_vec(self).map_err(|_| "Failed to serialize state")?;
+        Ok(crate::crypto::encrypt(
+            encryption_key,
+            nonce,
+            b"PQ-Aura State Export",
+            &serialized,
+        ))
+    }
+
+    /// Imports and decrypts a state using a provided symmetric key.
+    pub fn import_state(
+        encryption_key: &SecretKeyMaterial,
+        nonce: &[u8; 12],
+        ciphertext: &[u8],
+    ) -> Result<Self, &'static str> {
+        let decrypted =
+            crate::crypto::decrypt(encryption_key, nonce, b"PQ-Aura State Export", ciphertext)?;
+        serde_json::from_slice(&decrypted).map_err(|_| "Failed to deserialize state")
+    }
 }
 
 // Custom implementation for HybridPublicKey because Encoded<MlKem1024> might not be easily zeroable

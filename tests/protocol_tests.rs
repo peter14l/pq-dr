@@ -58,6 +58,33 @@ fn test_triple_alice_bob_hardened() {
     assert_eq!(decrypted, b"Test Message");
 }
 
+#[test]
+fn test_state_persistence() {
+    let mut rng = thread_rng();
+    let root_key = SecretKeyMaterial([0x42; 32]);
+
+    let (alice_pk, alice_sk) = generate_hybrid_keypair(&mut rng);
+    let (bob_pk, _bob_sk) = generate_hybrid_keypair(&mut rng);
+
+    let alice_state = RatchetState::new_alice(root_key, bob_pk, alice_pk, alice_sk);
+
+    let storage_key = SecretKeyMaterial([0x77; 32]);
+    let storage_nonce = [0u8; 12];
+
+    let exported = alice_state
+        .export_state(&storage_key, &storage_nonce)
+        .expect("Failed to export state");
+
+    let imported = RatchetState::import_state(&storage_key, &storage_nonce, &exported)
+        .expect("Failed to import state");
+
+    assert_eq!(alice_state.root_key.as_ref(), imported.root_key.as_ref());
+    assert_eq!(
+        alice_state.dh_pk.classic.as_bytes(),
+        imported.dh_pk.classic.as_bytes()
+    );
+}
+
 #[cfg(test)]
 mod prop_tests {
     use super::*;
