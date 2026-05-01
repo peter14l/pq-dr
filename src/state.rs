@@ -71,7 +71,10 @@ impl RatchetState {
             recv_chain: None,
             send_header_chain: None,
             recv_header_chain: None,
-            next_recv_header_chain: Some(HeaderChain { key: h_key, index: 0 }),
+            next_recv_header_chain: Some(HeaderChain {
+                key: h_key,
+                index: 0,
+            }),
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
             pending_kem_ciphertext: Vec::new(),
@@ -95,7 +98,10 @@ impl RatchetState {
             recv_chain: None,
             send_header_chain: None,
             recv_header_chain: None,
-            next_recv_header_chain: Some(HeaderChain { key: h_key, index: 0 }),
+            next_recv_header_chain: Some(HeaderChain {
+                key: h_key,
+                index: 0,
+            }),
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
             pending_kem_ciphertext: Vec::new(),

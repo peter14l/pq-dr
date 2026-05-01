@@ -63,11 +63,11 @@ impl RatchetEngine {
             .as_mut()
             .expect("Header chain not initialized");
         let header_bytes = serde_json::to_vec(&header).unwrap();
-        
+
         let mut header_nonce = [0u8; 12];
         header_nonce[0..4].copy_from_slice(&header_chain.index.to_le_bytes());
         header_chain.index += 1;
-        
+
         let header_ciphertext =
             crypto::encrypt(&header_chain.key, &header_nonce, ad, &header_bytes);
 
@@ -89,13 +89,17 @@ impl RatchetEngine {
         ad: &[u8],
     ) -> Result<Vec<u8>, &'static str> {
         // 1. Trial decryption of the header.
-        let (header, is_new_ratchet, try_idx, mut worked_h_chain) = Self::trial_decrypt_header(state, message, ad)?;
+        let (header, is_new_ratchet, try_idx, mut worked_h_chain) =
+            Self::trial_decrypt_header(state, message, ad)?;
 
         // 2. Check if this is a skipped/delayed message.
-        if let Some(msg_key) = state.skipped_msg_keys.remove(&(header.dh_pk.clone(), header.n)) {
+        if let Some(msg_key) = state
+            .skipped_msg_keys
+            .remove(&(header.dh_pk.clone(), header.n))
+        {
             // Update the index of the header chain that worked
             if is_new_ratchet {
-                 // This is unusual for a skipped key, but let's be robust.
+                // This is unusual for a skipped key, but let's be robust.
             } else if let Some(h_chain) = state.recv_header_chain.as_mut() {
                 h_chain.index = std::cmp::max(h_chain.index, try_idx + 1);
             }
@@ -223,7 +227,10 @@ impl RatchetEngine {
         if let Some(initial_h_chain) = state.next_recv_header_chain.take() {
             state.send_header_chain = Some(initial_h_chain);
         } else {
-            state.send_header_chain = Some(HeaderChain { key: send_h_key, index: 0 });
+            state.send_header_chain = Some(HeaderChain {
+                key: send_h_key,
+                index: 0,
+            });
         }
 
         state.root_key = new_root;
@@ -231,7 +238,10 @@ impl RatchetEngine {
             key: new_send_chain,
             index: 0,
         });
-        state.next_recv_header_chain = Some(HeaderChain { key: next_h_key, index: 0 });
+        state.next_recv_header_chain = Some(HeaderChain {
+            key: next_h_key,
+            index: 0,
+        });
     }
 
     fn perform_receiving_dh_step(
@@ -259,7 +269,7 @@ impl RatchetEngine {
             index: 0,
         });
         state.send_chain = None; // Trigger new sending ratchet on next encrypt
-        
+
         // The header chain that worked for this message is now our current receiving header chain.
         state.recv_header_chain = Some(worked_h_chain);
 

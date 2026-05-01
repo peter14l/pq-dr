@@ -62,11 +62,12 @@ fn sync_alice_bob() -> (RatchetState, RatchetState) {
     let (alice_pk, alice_sk) = generate_hybrid_keypair(&mut rng);
     let (bob_pk, bob_sk) = generate_hybrid_keypair(&mut rng);
 
-    let mut alice_state = RatchetState::new_alice(root_key.clone(), bob_pk.clone(), alice_pk.clone(), alice_sk);
+    let mut alice_state =
+        RatchetState::new_alice(root_key.clone(), bob_pk.clone(), alice_pk.clone(), alice_sk);
     let mut bob_state = RatchetState::new_bob(root_key, bob_pk, bob_sk);
 
     let msg1 = RatchetEngine::encrypt(&mut alice_state, b"sync", ad, &mut rng);
-    
+
     // Bob sets up his initial state from an X3DH handshake
     bob_state.remote_dh_pk = Some(alice_pk.clone());
 
