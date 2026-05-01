@@ -45,7 +45,7 @@ fn test_triple_alice_bob_hardened() {
     // This is the core of Header Encryption: Bob must be able to trial-decrypt the first header.
     // We simulate the key derivation that Bob would do upon receiving the first message.
     let (_ss_bob, _) = hybrid_encapsulate(&alice_pk, &mut rng); // This is a simulation
-                                                               // In reality, Bob would decapsulate a KEM ciphertext from the message.
+                                                                // In reality, Bob would decapsulate a KEM ciphertext from the message.
 
     // Let's perform a simple sanity check on encryption/decryption.
     // Since the full state machine depends on a precise initial handshake (X3DH),
