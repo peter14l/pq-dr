@@ -140,7 +140,7 @@ pub fn hybrid_decapsulate(
 
     let x_shared = sk.classic.diffie_hellman(&ephemeral_x_public);
 
-    let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024Params>::try_from(ml_ciphertext_bytes)
+    let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024>::try_from(ml_ciphertext_bytes)
         .map_err(|_| "Invalid ML-KEM ciphertext")?;
     let ml_shared = sk
         .quantum
