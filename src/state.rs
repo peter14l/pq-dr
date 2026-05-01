@@ -45,6 +45,7 @@ pub struct RatchetState {
     pub prev_send_len: u32,
 
     /// Skipped message keys for handling out-of-order messages.
+    #[zeroize(skip)]
     pub skipped_msg_keys: HashMap<(HybridPublicKey, u32), SecretKeyMaterial>,
 }
 

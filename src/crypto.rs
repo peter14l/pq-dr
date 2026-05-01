@@ -3,10 +3,10 @@ use aes_gcm_siv::{
     Aes256GcmSiv, Nonce,
 };
 use blake3::Hasher;
-use ml_kem::{DecapsulationKey, EncapsulationKey, KemCore, MlKem1024};
+use ml_kem::{kem::DecapsulationKey, kem::EncapsulationKey, KemCore, MlKem1024};
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::hash::{Hash, Hasher as _};
+use std::hash::Hash;
 use subtle::ConstantTimeEq;
 use x25519_dalek::{PublicKey as XPublicKey, StaticSecret as XStaticSecret};
 use zeroize::{Zeroize, ZeroizeOnDrop};
@@ -146,7 +146,8 @@ pub fn hybrid_decapsulate(
 
 /// Encrypts a message using AES-256-GCM-SIV.
 pub fn encrypt(key: &SecretKeyMaterial, nonce: &[u8; 12], ad: &[u8], plaintext: &[u8]) -> Vec<u8> {
-    let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+    let key_bytes: &[u8; 32] = key.0.as_ref().try_into().unwrap();
+    let cipher = Aes256GcmSiv::new(key_bytes.into());
     let nonce = Nonce::from_slice(nonce);
     cipher
         .encrypt(
@@ -166,7 +167,8 @@ pub fn decrypt(
     ad: &[u8],
     ciphertext: &[u8],
 ) -> Result<Vec<u8>, &'static str> {
-    let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+    let key_bytes: &[u8; 32] = key.0.as_ref().try_into().unwrap();
+    let cipher = Aes256GcmSiv::new(key_bytes.into());
     let nonce = Nonce::from_slice(nonce);
     cipher
         .decrypt(
@@ -228,7 +230,7 @@ mod serde_bytes_fixed {
 
 mod serde_quantum_pubkey {
     use super::*;
-    use ml_kem::EncapsulationKey;
+    use ml_kem::kem::EncapsulationKey;
 
     pub fn serialize<S>(key: &EncapsulationKey<MlKem1024>, serializer: S) -> Result<S::Ok, S::Error>
     where
