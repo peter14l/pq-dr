@@ -4,8 +4,8 @@ use aes_gcm_siv::{
 };
 use blake3::Hasher;
 use ml_kem::{
-    kem::DecapsulationKey, kem::EncapsulationKey, Decapsulate, Encapsulate, KemCore, MlKem1024,
-    MlKem1024Params,
+    kem::Decapsulate, kem::DecapsulationKey, kem::Encapsulate, kem::EncapsulationKey,
+    EncodedSizeUser, KemCore, MlKem1024, MlKem1024Params,
 };
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -44,7 +44,7 @@ pub struct HybridPublicKey {
 impl PartialEq for HybridPublicKey {
     fn eq(&self, other: &Self) -> bool {
         self.classic.as_bytes() == other.classic.as_bytes()
-            && self.quantum.as_ref() == other.quantum.as_ref()
+            && self.quantum.as_bytes() == other.quantum.as_bytes()
     }
 }
 
@@ -53,7 +53,7 @@ impl Eq for HybridPublicKey {}
 impl Hash for HybridPublicKey {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.classic.as_bytes().hash(state);
-        self.quantum.as_ref().hash(state);
+        self.quantum.as_bytes().hash(state);
     }
 }
 
@@ -66,8 +66,7 @@ pub struct HybridSecretKey {
 impl Zeroize for HybridSecretKey {
     fn zeroize(&mut self) {
         self.classic.zeroize();
-        // DecapsulationKey doesn't implement Zeroize, but we can't do much if the crate doesn't support it.
-        // In a real scenario, we might wrap it or use a different crate if this is critical.
+        // DecapsulationKey doesn't implement Zeroize, but we ensure classical is wiped.
     }
 }
 
@@ -84,8 +83,11 @@ pub fn generate_hybrid_keypair<R: RngCore + CryptoRng>(
     let x_secret = XStaticSecret::random_from_rng(rng);
     let x_public = XPublicKey::from(&x_secret);
 
-    // MlKem1024::generate returns (EncapsulationKey, DecapsulationKey)
-    let (ml_pk, ml_sk) = MlKem1024::generate(rng);
+    // According to compiler: generate returns (EncapsulationKey, DecapsulationKey)
+    // but assignment was swapped? Let's check the error again.
+    // "expected EncapsulationKey, found DecapsulationKey" for quantum: ml_pk
+    // This means ml_pk is DecapsulationKey. So MlKem1024::generate returns (SK, PK).
+    let (ml_sk, ml_pk) = MlKem1024::generate(rng);
 
     (
         HybridPublicKey {
@@ -150,7 +152,7 @@ pub fn hybrid_decapsulate(
     let x_shared = sk.classic.diffie_hellman(&ephemeral_x_public);
 
     // ML-KEM-1024 decapsulation
-    let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024Params>::try_from(ml_ciphertext_bytes)
+    let ml_ciphertext = ml_kem::Ciphertext::<MlKem1024>::try_from(ml_ciphertext_bytes)
         .map_err(|_| "Invalid ML-KEM ciphertext")?;
     let ml_shared = sk
         .quantum
@@ -163,7 +165,8 @@ pub fn hybrid_decapsulate(
 
 /// Encrypts a message using AES-256-GCM-SIV.
 pub fn encrypt(key: &SecretKeyMaterial, nonce: &[u8; 12], ad: &[u8], plaintext: &[u8]) -> Vec<u8> {
-    let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+    let key_bytes: [u8; 32] = key.0;
+    let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
     let nonce = Nonce::from_slice(nonce);
     cipher
         .encrypt(
@@ -183,7 +186,8 @@ pub fn decrypt(
     ad: &[u8],
     ciphertext: &[u8],
 ) -> Result<Vec<u8>, &'static str> {
-    let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+    let key_bytes: [u8; 32] = key.0;
+    let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
     let nonce = Nonce::from_slice(nonce);
     cipher
         .decrypt(
@@ -254,7 +258,7 @@ mod serde_quantum_pubkey {
     where
         S: Serializer,
     {
-        key.as_ref().serialize(serializer)
+        key.as_bytes().serialize(serializer)
     }
 
     pub fn deserialize<'de, D>(
