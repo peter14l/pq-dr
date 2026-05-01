@@ -14,6 +14,7 @@ pub struct ChainState {
 #[derive(Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 pub struct HeaderChain {
     pub key: SecretKeyMaterial,
+    pub index: u32,
 }
 
 /// The main state for a Double Ratchet session.
@@ -47,6 +48,9 @@ pub struct RatchetState {
     /// Skipped message keys for handling out-of-order messages.
     #[zeroize(skip)]
     pub skipped_msg_keys: HashMap<(HybridPublicKey, u32), SecretKeyMaterial>,
+
+    /// Pending KEM ciphertext to be sent in the next header
+    pub pending_kem_ciphertext: Vec<u8>,
 }
 
 impl RatchetState {
@@ -69,6 +73,7 @@ impl RatchetState {
             next_recv_header_chain: None,
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
+            pending_kem_ciphertext: Vec::new(),
         }
     }
 
@@ -91,6 +96,7 @@ impl RatchetState {
             next_recv_header_chain: None,
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
+            pending_kem_ciphertext: Vec::new(),
         }
     }
 }

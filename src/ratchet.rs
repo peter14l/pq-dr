@@ -1,4 +1,4 @@
-use crate::crypto::{self, HybridPublicKey, SecretKeyMaterial};
+use crate::crypto::{self, HybridPublicKey};
 use crate::state::{ChainState, HeaderChain, RatchetState};
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};
@@ -87,12 +87,19 @@ impl RatchetEngine {
         ad: &[u8],
     ) -> Result<Vec<u8>, &'static str> {
         // 1. Trial decryption of the header.
-        let (header, is_new_ratchet) = Self::trial_decrypt_header(state, message, ad)?;
+        let (header, is_new_ratchet, try_idx) = Self::trial_decrypt_header(state, message, ad)?;
 
         // 2. Handle out-of-order and skipped message keys.
         if is_new_ratchet {
             Self::skip_msg_keys(state, header.prev_n)?;
             Self::perform_receiving_dh_step(state, &header)?;
+            if let Some(h_chain) = state.recv_header_chain.as_mut() {
+                h_chain.index = try_idx + 1;
+            }
+        } else {
+            if let Some(h_chain) = state.recv_header_chain.as_mut() {
+                h_chain.index = try_idx + 1;
+            }
         }
 
         Self::skip_msg_keys(state, header.n)?;
@@ -119,27 +126,35 @@ impl RatchetEngine {
         state: &RatchetState,
         message: &Message,
         ad: &[u8],
-    ) -> Result<(Header, bool), &'static str> {
-        let header_nonce = [0u8; 12];
-
+    ) -> Result<(Header, bool, u32), &'static str> {
         // Try current receiving header chain.
         if let Some(h_chain) = &state.recv_header_chain {
-            if let Ok(header_bytes) =
-                crypto::decrypt(&h_chain.key, &header_nonce, ad, &message.header_ciphertext)
-            {
-                if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
-                    return Ok((header, false));
+            for i in 0..10 {
+                let mut header_nonce = [0u8; 12];
+                let try_idx = h_chain.index + i;
+                header_nonce[0..4].copy_from_slice(&try_idx.to_le_bytes());
+                if let Ok(header_bytes) =
+                    crypto::decrypt(&h_chain.key, &header_nonce, ad, &message.header_ciphertext)
+                {
+                    if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
+                        return Ok((header, false, try_idx));
+                    }
                 }
             }
         }
 
         // Try next potential header chain (for DH ratchet).
         if let Some(h_chain) = &state.next_recv_header_chain {
-            if let Ok(header_bytes) =
-                crypto::decrypt(&h_chain.key, &header_nonce, ad, &message.header_ciphertext)
-            {
-                if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
-                    return Ok((header, true));
+            for i in 0..10 {
+                let mut header_nonce = [0u8; 12];
+                let try_idx = h_chain.index + i;
+                header_nonce[0..4].copy_from_slice(&try_idx.to_le_bytes());
+                if let Ok(header_bytes) =
+                    crypto::decrypt(&h_chain.key, &header_nonce, ad, &message.header_ciphertext)
+                {
+                    if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
+                        return Ok((header, true, try_idx));
+                    }
                 }
             }
         }
@@ -168,7 +183,8 @@ impl RatchetEngine {
     }
 
     fn perform_sending_dh_step<R: RngCore + CryptoRng>(state: &mut RatchetState, rng: &mut R) {
-        let (shared_secret, _ct) = crypto::hybrid_encapsulate(&state.remote_dh_pk, rng);
+        let (shared_secret, ct) = crypto::hybrid_encapsulate(&state.remote_dh_pk, rng);
+        state.pending_kem_ciphertext = ct;
         let (new_root, new_send_chain) = crypto::kdf_step(&state.root_key, shared_secret.as_ref());
 
         // Derive header encryption keys from the chain key (Signal-style).
@@ -179,7 +195,10 @@ impl RatchetEngine {
             key: new_send_chain,
             index: 0,
         });
-        state.send_header_chain = Some(HeaderChain { key: send_h_key });
+        state.send_header_chain = Some(HeaderChain {
+            key: send_h_key,
+            index: 0,
+        });
     }
 
     fn perform_receiving_dh_step(
@@ -189,14 +208,11 @@ impl RatchetEngine {
         state.prev_send_len = state.send_chain.as_ref().map(|c| c.index).unwrap_or(0);
         state.remote_dh_pk = header.dh_pk.clone();
 
-        // In a real KEM ratchet, the ciphertext is in the header.
-        // Since we are simulating, we'll use a placeholder or derive from the header PK.
-        // For production, the Hybrid-KEM would take the actual header.kem_ciphertext.
         let shared_secret = crypto::hybrid_decapsulate(
             state.dh_sk.as_ref().ok_or("No local secret key")?,
             &header.kem_ciphertext,
         )
-        .unwrap_or_else(|_| SecretKeyMaterial([0xee; 32])); // Error handling simplified for demo
+        .map_err(|_| "Decapsulation failed")?;
 
         let (new_root, new_recv_chain) = crypto::kdf_step(&state.root_key, shared_secret.as_ref());
 
@@ -208,7 +224,10 @@ impl RatchetEngine {
             key: new_recv_chain,
             index: 0,
         });
-        state.recv_header_chain = Some(HeaderChain { key: recv_h_key });
+        state.recv_header_chain = Some(HeaderChain {
+            key: recv_h_key,
+            index: 0,
+        });
 
         // Generate next DH keypair to be ready for the next sending step.
         let mut rng = rand::thread_rng();
@@ -219,7 +238,10 @@ impl RatchetEngine {
         // Pre-derive the "next" header key to allow trial decryption of the next ratchet.
         // This is a core part of Signal's header encryption.
         let (next_h_key, _) = crypto::kdf_step(&state.root_key, b"Next Header Chain");
-        state.next_recv_header_chain = Some(HeaderChain { key: next_h_key });
+        state.next_recv_header_chain = Some(HeaderChain {
+            key: next_h_key,
+            index: 0,
+        });
 
         Ok(())
     }
