@@ -1,4 +1,4 @@
-use crate::crypto::{self, HybridPublicKey, HybridSecretKey, SecretKeyMaterial};
+use crate::crypto::{self, HybridPublicKey, SecretKeyMaterial};
 use crate::state::{ChainState, HeaderChain, RatchetState};
 use rand_core::{CryptoRng, RngCore};
 use serde::{Deserialize, Serialize};

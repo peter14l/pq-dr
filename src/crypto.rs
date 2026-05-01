@@ -1,15 +1,12 @@
 use aes_gcm_siv::{
-    aead::{Aead, KeyInit},
+    aead::{Aead, KeyInit, Payload},
     Aes256GcmSiv, Nonce,
 };
 use blake3::Hasher;
-use hkdf::Hkdf;
-use ml_kem::{
-    kem::{Decapsulate, Encapsulate},
-    Encoded, MlKem1024,
-};
+use ml_kem::{DecapsulationKey, EncapsulationKey, KemCore, MlKem1024};
 use rand_core::{CryptoRng, RngCore};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::hash::{Hash, Hasher as _};
 use subtle::ConstantTimeEq;
 use x25519_dalek::{PublicKey as XPublicKey, StaticSecret as XStaticSecret};
 use zeroize::{Zeroize, ZeroizeOnDrop};
@@ -37,14 +34,31 @@ impl AsRef<[u8]> for SecretKeyMaterial {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct HybridPublicKey {
     pub classic: XPublicKey,
-    pub quantum: Encoded<MlKem1024>,
+    #[serde(with = "serde_quantum_pubkey")]
+    pub quantum: EncapsulationKey<MlKem1024>,
+}
+
+impl PartialEq for HybridPublicKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.classic.as_bytes() == other.classic.as_bytes()
+            && self.quantum.as_bytes() == other.quantum.as_bytes()
+    }
+}
+
+impl Eq for HybridPublicKey {}
+
+impl Hash for HybridPublicKey {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.classic.as_bytes().hash(state);
+        self.quantum.as_bytes().hash(state);
+    }
 }
 
 /// Hybrid Secret Key containing both X25519 and ML-KEM-1024 components.
 #[derive(Zeroize, ZeroizeOnDrop)]
 pub struct HybridSecretKey {
     pub classic: XStaticSecret,
-    pub quantum: ml_kem::SecretKey<MlKem1024>,
+    pub quantum: DecapsulationKey<MlKem1024>,
 }
 
 /// Generates a new Hybrid Keypair.
@@ -69,9 +83,6 @@ pub fn generate_hybrid_keypair<R: RngCore + CryptoRng>(
 }
 
 /// Combines classical and quantum entropy using BLAKE3 as a KDF.
-///
-/// This implements the "Defense in Depth" philosophy: if one algorithm is broken,
-/// the resulting secret remains secure as long as the other holds.
 pub fn combine_secrets(classic: &[u8], quantum: &[u8]) -> SecretKeyMaterial {
     let mut hasher = Hasher::new();
     hasher.update(b"PQ-Aura Hybrid KDF");
@@ -140,7 +151,7 @@ pub fn encrypt(key: &SecretKeyMaterial, nonce: &[u8; 12], ad: &[u8], plaintext: 
     cipher
         .encrypt(
             nonce,
-            aes_gcm_siv::aead::Payload {
+            Payload {
                 msg: plaintext,
                 aad: ad,
             },
@@ -160,7 +171,7 @@ pub fn decrypt(
     cipher
         .decrypt(
             nonce,
-            aes_gcm_siv::aead::Payload {
+            Payload {
                 msg: ciphertext,
                 aad: ad,
             },
@@ -173,14 +184,18 @@ pub fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
     a.ct_eq(b).into()
 }
 
-/// KDF for generating new keys from a root key.
+/// KDF for generating new keys from a root key using BLAKE3 XOF.
 pub fn kdf_step(
     root_key: &SecretKeyMaterial,
     info: &[u8],
 ) -> (SecretKeyMaterial, SecretKeyMaterial) {
-    let hk = Hkdf::<blake3::Hasher>::new(None, root_key.as_ref());
+    let mut hasher = Hasher::new_derive_key("PQ-Aura KDF Context");
+    hasher.update(root_key.as_ref());
+    hasher.update(info);
+
+    let mut reader = hasher.finalize_xof();
     let mut okm = [0u8; 64];
-    hk.expand(info, &mut okm).expect("HKDF expansion failed");
+    reader.fill(&mut okm);
 
     let (new_root, new_chain) = okm.split_at(32);
     (
@@ -208,5 +223,29 @@ mod serde_bytes_fixed {
             .try_into()
             .map_err(|_| serde::de::Error::custom("Expected 32 bytes"))?;
         Ok(array)
+    }
+}
+
+mod serde_quantum_pubkey {
+    use super::*;
+    use ml_kem::EncapsulationKey;
+
+    pub fn serialize<S>(key: &EncapsulationKey<MlKem1024>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        key.as_bytes().serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<EncapsulationKey<MlKem1024>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bytes = Vec::<u8>::deserialize(deserializer)?;
+        let array = bytes
+            .as_slice()
+            .try_into()
+            .map_err(|_| serde::de::Error::custom("Invalid length"))?;
+        Ok(EncapsulationKey::from_bytes(array))
     }
 }

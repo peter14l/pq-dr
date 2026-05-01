@@ -1,0 +1,1141 @@
+error[E0425]: cannot find type `SecretKey` in crate `ml_kem`
+   --> src/crypto.rs:47:26
+    |
+ 47 |     pub quantum: ml_kem::SecretKey<MlKem1024>,
+    |                          ^^^^^^^^^
+    |
+   ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/lib.rs:191:1
+    |
+191 | pub type SharedKey<K> = Array<u8, <K as KemCore>::SharedKeySize>;
+    | --------------------- similarly named type alias `SharedKey` defined here
+    |
+help: a type alias with a similar name exists
+    |
+ 47 -     pub quantum: ml_kem::SecretKey<MlKem1024>,
+ 47 +     pub quantum: ml_kem::SharedKey<MlKem1024>,
+    |
+error: unused import: `HybridSecretKey`
+ --> src/ratchet.rs:1:44
+  |
+1 | use crate::crypto::{self, HybridPublicKey, HybridSecretKey, SecretKeyMaterial};
+  |                                            ^^^^^^^^^^^^^^^
+  |
+  = note: `-D unused-imports` implied by `-D warnings`
+  = help: to override `-D warnings` add `#[allow(unused_imports)]`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:40:18
+    |
+ 40 |     pub quantum: Encoded<MlKem1024>,
+    |                  ^^^^^^^^^^^^^^^^^^ the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |          ----- in this derive macro expansion
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `std::clone::Clone`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/clone.rs:194:0
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `crypto::_::_serde::Serialize`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/ser/mod.rs:234:1
+    |
+234 | / pub trait Serialize {
+235 | |     /// Serialize this value into the given Serde serializer.
+236 | |     ///
+237 | |     /// See the [Implementing `Serialize`] section of the manual for more
+...   |
+267 | |         S: Serializer;
+268 | | }
+    | |_^ required by this bound in `Serialize`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:37:28
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |                            ^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `std::result::Result`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/result.rs:557:0
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `crypto::_::_serde::Deserialize`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/de/mod.rs:554:29
+    |
+554 | pub trait Deserialize<'de>: Sized {
+    |                             ^^^^^ required by this bound in `Deserialize`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+    --> src/crypto.rs:38:12
+     |
+  38 | pub struct HybridPublicKey {
+     |            ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+     |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+     |
+  46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+  47 | | where
+  48 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+ 171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+ 172 | | where
+ 173 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+    --> src/crypto.rs:38:12
+     |
+  38 | pub struct HybridPublicKey {
+     |            ^^^^^^^^^^^^^^^
+note: required by a bound in `crypto::_::_serde::de::Visitor::Value`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/de/mod.rs:1319:5
+     |
+1319 |     type Value;
+     |     ^^^^^^^^^^^ required by this bound in `Visitor::Value`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:53:6
+    |
+ 53 | ) -> (HybridPublicKey, HybridSecretKey) {
+    |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: only the last element of a tuple may have a dynamically sized type
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/ratchet.rs:12:16
+    |
+ 12 |     pub dh_pk: HybridPublicKey,
+    |                ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: only the last field of a struct may have a dynamically sized type
+    = help: change the field's type to have a statically known size
+help: borrowed types always have a statically known size
+    |
+ 12 |     pub dh_pk: &HybridPublicKey,
+    |                +
+help: the `Box` type always has a statically known size and allocates its contents in the heap
+    |
+ 12 |     pub dh_pk: Box<HybridPublicKey>,
+    |                ++++               +
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:28:16
+    |
+ 28 |     pub dh_pk: HybridPublicKey,
+    |                ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: only the last field of a struct may have a dynamically sized type
+    = help: change the field's type to have a statically known size
+help: borrowed types always have a statically known size
+    |
+ 28 |     pub dh_pk: &HybridPublicKey,
+    |                +
+help: the `Box` type always has a statically known size and allocates its contents in the heap
+    |
+ 28 |     pub dh_pk: Box<HybridPublicKey>,
+    |                ++++               +
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:99:18
+    |
+ 99 | impl Zeroize for HybridPublicKey {
+    |                  ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `zeroize::Zeroize`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zeroize-1.8.2/src/lib.rs:272:1
+    |
+272 | / pub trait Zeroize {
+273 | |     /// Zero out this object from memory using Rust intrinsics which ensure the
+274 | |     /// zeroization operation is not "optimized away" by the compiler.
+275 | |     fn zeroize(&mut self);
+276 | | }
+    | |_^ required by this bound in `Zeroize`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:37:10
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |          ^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: the return type of a function must have a statically known size
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:40:5
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |          ----- in this derive macro expansion
+...
+ 40 |     pub quantum: Encoded<MlKem1024>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:37:10
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |          ^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: structs must have a statically known size to be initialized
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:37:17
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |                 ^^^^^^^^^ the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+    = note: this error originates in the derive macro `Serialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::hybrid_array::Array<u8, _>: serde::Serialize` is not satisfied
+    --> src/crypto.rs:37:17
+     |
+  37 | #[derive(Clone, Serialize, Deserialize)]
+     |                 ^^^^^^^^^ the trait `crypto::_::_serde::Serialize` is not implemented for `ml_kem::hybrid_array::Array<u8, _>`
+...
+  40 |     pub quantum: Encoded<MlKem1024>,
+     |     --- required by a bound introduced by this call
+     |
+     = note: for local types consider adding `#[derive(serde::Serialize)]` to your `ml_kem::hybrid_array::Array<u8, _>` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `crypto::_::_serde::Serialize`:
+               &'a T
+               &'a mut T
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+               (T0, T1, T2, T3, T4)
+             and 145 others
+    |                            this can't be annotated with `?` because it has type `Result<_, <__A as crypto::_::_serde::de::MapAccess<'_>>::Error>`
+note: required by a bound in `crypto::_::_serde::ser::SerializeStruct::serialize_field`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/ser/mod.rs:1917:21
+     |
+1915 |     fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
+     |        --------------- required by a bound in this associated function
+1916 |     where
+1917 |         T: ?Sized + Serialize;
+     |                     ^^^^^^^^^ required by this bound in `SerializeStruct::serialize_field`
+     = note: the full name for the type has been written to '/home/runner/work/pq-dr/pq-dr/target/debug/deps/pq_aura-d7c662dc22b6840c.long-type-14531445189564956517.txt'
+     = note: consider using `--verbose` to print the full type name to the console
+     = note: this error originates in the derive macro `Serialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: `?` couldn't convert the error: `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:37:38
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |                            ----------^
+    |                            |         |
+    |                            |         within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |                            this can't be annotated with `?` because it has type `Result<_, <__A as crypto::_::_serde::de::SeqAccess<'_>>::Error>`
+    |
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:37:28
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |                            ^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `std::prelude::v1::Err`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/result.rs:566:4
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::hybrid_array::Array<u8, _>: serde::Deserialize<'de>` is not satisfied
+    --> src/crypto.rs:40:18
+     |
+  40 |     pub quantum: Encoded<MlKem1024>,
+     |                  ^^^^^^^^^^^^^^^^^^ the trait `crypto::_::_serde::Deserialize<'_>` is not implemented for `ml_kem::hybrid_array::Array<u8, _>`
+     |
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `ml_kem::hybrid_array::Array<u8, _>` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `crypto::_::_serde::Deserialize<'de>`:
+               &'a [u8]
+               &'a std::path::Path
+               &'a str
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+             and 158 others
+note: required by a bound in `crypto::_::_serde::de::SeqAccess::next_element`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/de/mod.rs:1771:12
+     |
+1769 |     fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
+     |        ------------ required by a bound in this associated function
+1770 |     where
+1771 |         T: Deserialize<'de>,
+     |            ^^^^^^^^^^^^^^^^ required by this bound in `SeqAccess::next_element`
+     = note: the full name for the type has been written to '/home/runner/work/pq-dr/pq-dr/target/debug/deps/pq_aura-d7c662dc22b6840c.long-type-10702875279135180739.txt'
+     = note: consider using `--verbose` to print the full type name to the console
+error[E0277]: `?` couldn't convert the error: `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:37:38
+    |
+ 37 | #[derive(Clone, Serialize, Deserialize)]
+    |                            ----------^
+    |                            |         |
+    |                            |         within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::hybrid_array::Array<u8, _>: serde::Deserialize<'de>` is not satisfied
+    --> src/crypto.rs:40:18
+     |
+  40 |     pub quantum: Encoded<MlKem1024>,
+     |                  ^^^^^^^^^^^^^^^^^^ the trait `crypto::_::_serde::Deserialize<'_>` is not implemented for `ml_kem::hybrid_array::Array<u8, _>`
+     |
+     = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `ml_kem::hybrid_array::Array<u8, _>` type
+     = note: for types from other crates check whether the crate offers a `serde` feature flag
+     = help: the following other types implement trait `crypto::_::_serde::Deserialize<'de>`:
+               &'a [u8]
+               &'a std::path::Path
+               &'a str
+               ()
+               (T,)
+               (T0, T1)
+               (T0, T1, T2)
+               (T0, T1, T2, T3)
+             and 158 others
+note: required by a bound in `crypto::_::_serde::de::MapAccess::next_value`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/de/mod.rs:1916:12
+     |
+1914 |     fn next_value<V>(&mut self) -> Result<V, Self::Error>
+     |        ---------- required by a bound in this associated function
+1915 |     where
+1916 |         V: Deserialize<'de>,
+     |            ^^^^^^^^^^^^^^^^ required by this bound in `MapAccess::next_value`
+     = note: the full name for the type has been written to '/home/runner/work/pq-dr/pq-dr/target/debug/deps/pq_aura-d7c662dc22b6840c.long-type-10702875279135180739.txt'
+     = note: consider using `--verbose` to print the full type name to the console
+error[E0277]: the trait bound `ml_kem::hybrid_array::Array<u8, _>: serde::Deserialize<'de>` is not satisfied
+  --> src/crypto.rs:37:28
+   |
+37 | #[derive(Clone, Serialize, Deserialize)]
+   |                            ^^^^^^^^^^^ the trait `crypto::_::_serde::Deserialize<'_>` is not implemented for `ml_kem::hybrid_array::Array<u8, _>`
+   |
+   = note: for local types consider adding `#[derive(serde::Deserialize)]` to your `ml_kem::hybrid_array::Array<u8, _>` type
+   = note: for types from other crates check whether the crate offers a `serde` feature flag
+   = help: the following other types implement trait `crypto::_::_serde::Deserialize<'de>`:
+             &'a [u8]
+             &'a std::path::Path
+             &'a str
+             ()
+             (T,)
+             (T0, T1)
+             (T0, T1, T2)
+             (T0, T1, T2, T3)
+           and 158 others
+note: required by a bound in `crypto::_::_serde::__private228::de::missing_field`
+  --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:26:8
+   |
+24 | pub fn missing_field<'de, V, E>(field: &'static str) -> Result<V, E>
+   |        ------------- required by a bound in this function
+25 | where
+26 |     V: Deserialize<'de>,
+   |        ^^^^^^^^^^^^^^^^ required by this bound in `missing_field`
+   = note: the full name for the type has been written to '/home/runner/work/pq-dr/pq-dr/target/debug/deps/pq_aura-d7c662dc22b6840c.long-type-10702875279135180739.txt'
+   = note: consider using `--verbose` to print the full type name to the console
+   = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0599]: no function or associated item named `generate` found for struct `ml_kem::kem::Kem<P>` in the current scope
+  --> src/crypto.rs:57:37
+   |
+57 |     let (ml_pk, ml_sk) = MlKem1024::generate(rng);
+   |                                     ^^^^^^^^ function or associated item not found in `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `KemCore` which provides `generate` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use ml_kem::KemCore;
+   |
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:62:13
+    |
+ 62 |             quantum: ml_pk,
+    |             ^^^^^^^^^^^^^^ the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/crypto.rs:60:9
+    |
+ 60 | /         HybridPublicKey {
+ 61 | |             classic: x_public,
+ 62 | |             quantum: ml_pk,
+ 63 | |         },
+    | |_________^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: structs must have a statically known size to be initialized
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied
+   --> src/crypto.rs:95:38
+    |
+ 95 |     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
+    |                                      ^^^^^^^^^^ the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+error[E0599]: no method named `encapsulate` found for struct `ml_kem::hybrid_array::Array<u8, _>` in the current scope
+  --> src/crypto.rs:95:49
+   |
+95 |     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
+   |                                                 ^^^^^^^^^^^ method not found in `ml_kem::hybrid_array::Array<u8, _>`
+error[E0282]: type annotations needed
+   --> src/crypto.rs:138:42
+    |
+138 |     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+    |                                          ^^^^^^
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+138 -     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+138 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).into());
+    |
+error[E0282]: type annotations needed
+   --> src/crypto.rs:158:42
+    |
+158 |     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+    |                                          ^^^^^^
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+158 -     let cipher = Aes256GcmSiv::new(key.0.as_ref().into());
+158 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key.0).into());
+    |
+error[E0277]: the trait bound `blake3::Hasher: hkdf::hmac::digest::OutputSizeUser` is not satisfied
+   --> src/crypto.rs:181:14
+    |
+181 |     let hk = Hkdf::<blake3::Hasher>::new(None, root_key.as_ref());
+    |              ^^^^^^^^^^^^^^^^^^^^^^ the trait `hkdf::hmac::digest::OutputSizeUser` is not implemented for `blake3::Hasher`
+    |
+    = help: the following other types implement trait `hkdf::hmac::digest::OutputSizeUser`:
+              hkdf::hmac::HmacCore<D>
+              hkdf::hmac::SimpleHmac<D>
+              hkdf::hmac::digest::core_api::CoreWrapper<T>
+              hkdf::hmac::digest::core_api::CtVariableCoreWrapper<T, OutSize, O>
+              sha3::Keccak224Core
+              sha3::Keccak256Core
+              sha3::Keccak256FullCore
+              sha3::Keccak384Core
+            and 5 others
+note: required by a bound in `hkdf::Hkdf`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hkdf-0.12.4/src/lib.rs:190:20
+    |
+190 | pub struct Hkdf<H: OutputSizeUser, I: HmacImpl<H> = Hmac<H>> {
+    |                    ^^^^^^^^^^^^^^ required by this bound in `Hkdf`
+error[E0277]: the trait bound `blake3::Hasher: hkdf::hmac::digest::core_api::CoreProxy` is not satisfied
+   --> src/crypto.rs:181:14
+    |
+181 |     let hk = Hkdf::<blake3::Hasher>::new(None, root_key.as_ref());
+    |              ^^^^^^^^^^^^^^^^^^^^^^ the trait `hkdf::hmac::digest::core_api::CoreProxy` is not implemented for `blake3::Hasher`
+    |
+help: the trait `hkdf::hmac::digest::core_api::CoreProxy` is implemented for `hkdf::hmac::digest::core_api::CoreWrapper<T>`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/digest-0.10.7/src/core_api/wrapper.rs:283:1
+    |
+283 | / impl<T> CoreProxy for CoreWrapper<T>
+284 | | where
+285 | |     T: BufferKindUser,
+286 | |     T::BlockSize: IsLess<U256>,
+287 | |     Le<T::BlockSize, U256>: NonZero,
+    | |____________________________________^
+    = note: required for `hkdf::hmac::HmacCore<blake3::Hasher>` to implement `hkdf::hmac::digest::core_api::BlockSizeUser`
+error[E0599]: the function or associated item `new` exists for struct `hkdf::Hkdf<blake3::Hasher>`, but its trait bounds were not satisfied
+    --> src/crypto.rs:181:38
+     |
+ 181 |     let hk = Hkdf::<blake3::Hasher>::new(None, root_key.as_ref());
+     |                                      ^^^ function or associated item cannot be called on `hkdf::Hkdf<blake3::Hasher>` due to unsatisfied trait bounds
+     |
+    ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/blake3-1.8.5/src/lib.rs:1066:1
+     |
+1066 | pub struct Hasher {
+     | ----------------- doesn't satisfy `_: CoreProxy` or `blake3::Hasher: hkdf::hmac::digest::OutputSizeUser`
+     |
+    ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hkdf-0.12.4/src/lib.rs:190:1
+     |
+ 190 | pub struct Hkdf<H: OutputSizeUser, I: HmacImpl<H> = Hmac<H>> {
+     | ------------------------------------------------------------ doesn't satisfy `_: InnerInit`, `_: InnerUser` or `hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+     |
+    ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/digest-0.10.7/src/core_api/wrapper.rs:24:1
+     |
+  24 | pub struct CoreWrapper<T>
+     | ------------------------- doesn't satisfy `_: HmacImpl<Hasher>`
+     |
+     = note: the following trait bounds were not satisfied:
+             `blake3::Hasher: hkdf::hmac::digest::OutputSizeUser`
+             `blake3::Hasher: hkdf::hmac::digest::core_api::CoreProxy`
+             which is required by `hkdf::hmac::digest::core_api::CoreWrapper<hkdf::hmac::HmacCore<blake3::Hasher>>: hkdf::HmacImpl<blake3::Hasher>`
+             `hkdf::Hkdf<blake3::Hasher>: hkdf::hmac::digest::InnerInit`
+             which is required by `hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+             `hkdf::Hkdf<blake3::Hasher>: hkdf::hmac::digest::crypto_common::InnerUser`
+             which is required by `hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+             `&hkdf::Hkdf<blake3::Hasher>: hkdf::hmac::digest::InnerInit`
+             which is required by `&hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+             `&hkdf::Hkdf<blake3::Hasher>: hkdf::hmac::digest::crypto_common::InnerUser`
+             which is required by `&hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+             `&mut hkdf::Hkdf<blake3::Hasher>: hkdf::hmac::digest::InnerInit`
+             which is required by `&mut hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+             `&mut hkdf::Hkdf<blake3::Hasher>: hkdf::hmac::digest::crypto_common::InnerUser`
+             which is required by `&mut hkdf::Hkdf<blake3::Hasher>: aes_gcm_siv::KeyInit`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+    --> src/ratchet.rs:10:10
+     |
+  10 | #[derive(Serialize, Deserialize, Clone)]
+     |          ^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+  11 | pub struct Header {
+  12 |     pub dh_pk: HybridPublicKey,
+     |     --- required by a bound introduced by this call
+     |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+     |
+  46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+  47 | | where
+  48 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+ 171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+ 172 | | where
+ 173 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+    --> src/crypto.rs:38:12
+     |
+  38 | pub struct HybridPublicKey {
+     |            ^^^^^^^^^^^^^^^
+note: required by a bound in `crypto::_::_serde::ser::SerializeStruct::serialize_field`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/ser/mod.rs:1915:24
+     |
+1915 |     fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<(), Self::Error>
+     |                        ^ required by this bound in `SerializeStruct::serialize_field`
+     = note: this error originates in the derive macro `Serialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+    --> src/ratchet.rs:12:16
+     |
+  12 |     pub dh_pk: HybridPublicKey,
+     |                ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+     |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+     |
+  46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+  47 | | where
+  48 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+ 171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+ 172 | | where
+ 173 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+    --> src/crypto.rs:38:12
+     |
+  38 | pub struct HybridPublicKey {
+     |            ^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `crypto::_::_serde::de::SeqAccess::next_element`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/de/mod.rs:1769:21
+     |
+1769 |     fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
+     |                     ^ required by the implicit `Sized` requirement on this type parameter in `SeqAccess::next_element`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/ratchet.rs:10:21
+    |
+ 10 | #[derive(Serialize, Deserialize, Clone)]
+    |                     ^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `std::option::Option`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/option.rs:600:0
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+    --> src/ratchet.rs:12:16
+     |
+  12 |     pub dh_pk: HybridPublicKey,
+     |                ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+     |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+     |
+  46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+  47 | | where
+  48 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+ 171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+ 172 | | where
+ 173 | |     P: KemParams,
+     | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+    --> src/crypto.rs:38:12
+     |
+  38 | pub struct HybridPublicKey {
+     |            ^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `crypto::_::_serde::de::MapAccess::next_value`
+    --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/src/de/mod.rs:1914:19
+     |
+1914 |     fn next_value<V>(&mut self) -> Result<V, Self::Error>
+     |                   ^ required by the implicit `Sized` requirement on this type parameter in `MapAccess::next_value`
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/ratchet.rs:10:31
+    |
+ 10 | #[derive(Serialize, Deserialize, Clone)]
+    |                               ^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `std::ops::ControlFlow`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/ops/control_flow.rs:89:0
+    = note: this error originates in the derive macro `Deserialize` (in Nightly builds, run with -Z macro-backtrace for more info)
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/ratchet.rs:12:5
+    |
+ 10 | #[derive(Serialize, Deserialize, Clone)]
+    |                                  ----- in this derive macro expansion
+ 11 | pub struct Header {
+ 12 |     pub dh_pk: HybridPublicKey,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `std::clone::Clone::clone`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/clone.rs:236:4
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/ratchet.rs:56:32
+    |
+ 56 |             dh_pk: state.dh_pk.clone(),
+    |                                ^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `std::clone::Clone::clone`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/clone.rs:236:4
+error[E0599]: the method `insert` exists for struct `std::collections::HashMap<(crypto::HybridPublicKey, u32), crypto::SecretKeyMaterial>`, but its trait bounds were not satisfied
+   --> src/ratchet.rs:163:18
+    |
+161 | /             state
+162 | |                 .skipped_msg_keys
+163 | |                 .insert((state.remote_dh_pk.clone(), chain.index), msg_key);
+    | |_________________-^^^^^^
+    |
+   ::: src/crypto.rs:38:1
+    |
+ 38 |   pub struct HybridPublicKey {
+    |   -------------------------- doesn't satisfy `crypto::HybridPublicKey: std::cmp::Eq` or `crypto::HybridPublicKey: std::hash::Hash`
+    |
+   ::: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:221:1
+    |
+221 |   pub struct Kem<P>
+    |   ----------------- doesn't satisfy `_: EncodedSizeUser`
+    |
+    = note: the following trait bounds were not satisfied:
+            `crypto::HybridPublicKey: std::cmp::Eq`
+            which is required by `(crypto::HybridPublicKey, u32): std::cmp::Eq`
+            `crypto::HybridPublicKey: std::hash::Hash`
+            which is required by `(crypto::HybridPublicKey, u32): std::hash::Hash`
+            `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser`
+            which is required by `(crypto::HybridPublicKey, u32): std::cmp::Eq`
+help: consider annotating `crypto::HybridPublicKey` with `#[derive(Eq, Hash, PartialEq)]`
+   --> src/crypto.rs:38:1
+    |
+ 38 + #[derive(Eq, Hash, PartialEq)]
+ 39 | pub struct HybridPublicKey {
+    |
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/ratchet.rs:163:45
+    |
+163 |                 .insert((state.remote_dh_pk.clone(), chain.index), msg_key);
+    |                                             ^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by a bound in `std::clone::Clone::clone`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/clone.rs:236:4
+help: function arguments must have a statically known size, borrowed types always have a known size
+    |
+ 55 |         remote_pk: &HybridPublicKey,
+    |                    +
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:70:31
+    |
+ 70 |             skipped_msg_keys: HashMap::new(),
+    |                               ^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: only the last element of a tuple may have a dynamically sized type
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:70:31
+    |
+ 70 |             skipped_msg_keys: HashMap::new(),
+    |                               ^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+    = note: only the last element of a tuple may have a dynamically sized type
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:77:19
+    |
+ 77 |         local_pk: HybridPublicKey,
+    |                   ^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+help: function arguments must have a statically known size, borrowed types always have a known size
+    |
+ 77 |         local_pk: &HybridPublicKey,
+    |                   +
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:85:36
+    |
+ 85 |             remote_dh_pk: unsafe { std::mem::zeroed() },
+    |                                    ^^^^^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
+   --> src/crypto.rs:38:12
+    |
+ 38 | pub struct HybridPublicKey {
+    |            ^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `std::mem::zeroed`
+   --> /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/mem/mod.rs:681:0
+error[E0277]: the trait bound `ml_kem::kem::Kem<ml_kem::MlKem1024Params>: ml_kem::EncodedSizeUser` is not satisfied in `crypto::HybridPublicKey`
+   --> src/state.rs:92:31
+    |
+ 92 |             skipped_msg_keys: HashMap::new(),
+    |                               ^^^^^^^^^^^^^^ within `crypto::HybridPublicKey`, the trait `ml_kem::EncodedSizeUser` is not implemented for `ml_kem::kem::Kem<ml_kem::MlKem1024Params>`
+    |
+help: the following other types implement trait `ml_kem::EncodedSizeUser`
+   --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ml-kem-0.2.3/src/kem.rs:46:1
+    |
+ 46 | / impl<P> EncodedSizeUser for DecapsulationKey<P>
+ 47 | | where
+ 48 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::DecapsulationKey<P>`
+...
+171 | / impl<P> EncodedSizeUser for EncapsulationKey<P>
+172 | | where
+173 | |     P: KemParams,
+    | |_________________^ `ml_kem::kem::EncapsulationKey<P>`
+note: required because it appears within the type `crypto::HybridPublicKey`
