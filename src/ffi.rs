@@ -88,8 +88,11 @@ pub unsafe extern "C" fn pqa_free_message(msg_ptr: *mut FfiMessage) {
         return;
     }
     let msg = Box::from_raw(msg_ptr);
-    let _ = Box::from_raw(std::slice::from_raw_parts_mut(msg.header, msg.header_len));
-    let _ = Box::from_raw(std::slice::from_raw_parts_mut(msg.payload, msg.payload_len));
+    let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(msg.header, msg.header_len));
+    let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+        msg.payload,
+        msg.payload_len,
+    ));
 }
 
 /// Frees a buffer allocated by the FFI.
@@ -101,5 +104,5 @@ pub unsafe extern "C" fn pqa_free_buffer(ptr: *mut u8, len: usize) {
     if ptr.is_null() {
         return;
     }
-    let _ = Box::from_raw(std::slice::from_raw_parts_mut(ptr, len));
+    let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(ptr, len));
 }

@@ -60,5 +60,5 @@ pub fn pqa_decrypt_wasm(
         payload_ciphertext: payload.to_vec(),
     };
 
-    RatchetEngine::decrypt(&mut state.inner, &message, ad).map_err(|e| JsValue::from_str(e))
+    RatchetEngine::decrypt(&mut state.inner, &message, ad).map_err(JsValue::from_str)
 }
