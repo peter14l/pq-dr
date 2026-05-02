@@ -106,6 +106,43 @@ fn test_out_of_order_messages() {
 }
 
 #[test]
+fn test_pq_x3dh_handshake() {
+    use pq_aura::handshake::*;
+    let mut rng = thread_rng();
+
+    // 1. Bob generates his keys and publishes a PreKeyBundle
+    let (bob_id_pk, bob_id_sk) = generate_hybrid_keypair(&mut rng);
+    let (bob_signed_pk, bob_signed_sk) = generate_hybrid_keypair(&mut rng);
+    let (bob_ot_pk, bob_ot_sk) = generate_hybrid_keypair(&mut rng);
+
+    let bundle = PreKeyBundle {
+        identity_pk: bob_id_pk.clone(),
+        signed_pre_key: bob_signed_pk,
+        one_time_pre_key: Some(bob_ot_pk),
+    };
+
+    // 2. Alice generates her Identity keys
+    let (alice_id_pk, alice_id_sk) = generate_hybrid_keypair(&mut rng);
+
+    // 3. Alice initiates the handshake using Bob's bundle
+    let (mut _alice_state, initial_msg, alice_root_key) =
+        HandshakeEngine::initiate_alice(&bundle, &alice_id_pk, &alice_id_sk, &mut rng);
+
+    // 4. Bob receives the initial message and responds
+    let (_bob_state, bob_root_key) = HandshakeEngine::respond_bob(
+        &initial_msg,
+        &bob_id_pk,
+        &bob_id_sk,
+        &bob_signed_sk,
+        Some(&bob_ot_sk),
+    )
+    .unwrap();
+
+    // 5. Verify the root keys match
+    assert_eq!(alice_root_key.as_ref(), bob_root_key.as_ref());
+}
+
+#[test]
 fn test_state_persistence() {
     let mut rng = thread_rng();
     let root_key = SecretKeyMaterial([0x42; 32]);

@@ -16,7 +16,7 @@ pub struct Header {
 }
 
 /// A complete PQ-Aura message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Message {
     /// Encrypted header.
     pub header_ciphertext: Vec<u8>,
