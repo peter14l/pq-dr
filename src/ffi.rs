@@ -12,7 +12,7 @@ pub struct FfiMessage {
 }
 
 /// Encrypts a message from Flutter.
-/// 
+///
 /// # Safety
 /// This function is unsafe because it handles raw pointers.
 #[no_mangle]
@@ -44,7 +44,7 @@ pub unsafe extern "C" fn pqa_encrypt(
 }
 
 /// Decrypts a message from Flutter.
-/// 
+///
 /// # Safety
 /// This function is unsafe because it handles raw pointers.
 #[no_mangle]
@@ -79,23 +79,27 @@ pub unsafe extern "C" fn pqa_decrypt(
 }
 
 /// Frees a message allocated by the FFI.
-/// 
+///
 /// # Safety
 /// This function is unsafe because it handles raw pointers.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_free_message(msg_ptr: *mut FfiMessage) {
-    if msg_ptr.is_null() { return; }
+    if msg_ptr.is_null() {
+        return;
+    }
     let msg = Box::from_raw(msg_ptr);
     let _ = Box::from_raw(std::slice::from_raw_parts_mut(msg.header, msg.header_len));
     let _ = Box::from_raw(std::slice::from_raw_parts_mut(msg.payload, msg.payload_len));
 }
 
 /// Frees a buffer allocated by the FFI.
-/// 
+///
 /// # Safety
 /// This function is unsafe because it handles raw pointers.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_free_buffer(ptr: *mut u8, len: usize) {
-    if ptr.is_null() { return; }
+    if ptr.is_null() {
+        return;
+    }
     let _ = Box::from_raw(std::slice::from_raw_parts_mut(ptr, len));
 }
