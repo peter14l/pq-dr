@@ -14,6 +14,18 @@ pub struct PreKeyBundle {
     pub one_time_pre_key: Option<HybridPublicKey>,
 }
 
+impl PreKeyBundle {
+    /// Serializes the bundle to bytes using JSON (for FFI transfer).
+    pub fn to_bytes(&self) -> Vec<u8> {
+        serde_json::to_vec(self).expect("Failed to serialize PreKeyBundle")
+    }
+
+    /// Deserializes a bundle from bytes.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        serde_json::from_slice(bytes).map_err(|_| "Failed to deserialize PreKeyBundle")
+    }
+}
+
 /// The first message sent to initiate a session.
 /// Contains the ephemeral keys Alice generated to perform the handshake.
 #[derive(Serialize, Deserialize, Clone)]
@@ -25,6 +37,18 @@ pub struct InitialMessage {
     pub kem_ciphertext_one_time: Option<Vec<u8>>,
     // The actual Double Ratchet message (e.g., "Hello Bob!")
     pub ratchet_message: crate::ratchet::Message,
+}
+
+impl InitialMessage {
+    /// Serializes the message to bytes using JSON (for FFI transfer).
+    pub fn to_bytes(&self) -> Vec<u8> {
+        serde_json::to_vec(self).expect("Failed to serialize InitialMessage")
+    }
+
+    /// Deserializes a message from bytes.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        serde_json::from_slice(bytes).map_err(|_| "Failed to deserialize InitialMessage")
+    }
 }
 
 pub struct HandshakeEngine;

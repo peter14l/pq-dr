@@ -96,6 +96,62 @@ pub fn generate_hybrid_keypair<R: RngCore + CryptoRng>(
     )
 }
 
+impl HybridPublicKey {
+    /// Serializes the hybrid public key to bytes for FFI transfer.
+    /// Format: [32 bytes X25519 public key] + [1568 bytes ML-KEM-1024 public key]
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(32 + 1568);
+        bytes.extend_from_slice(self.classic.as_bytes());
+        bytes.extend_from_slice(&self.quantum.as_bytes());
+        bytes
+    }
+
+    /// Deserializes a hybrid public key from bytes.
+    /// Format: [32 bytes X25519] + [1568 bytes ML-KEM-1024]
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        if bytes.len() != 32 + 1568 {
+            return Err("Invalid hybrid public key length");
+        }
+        let (x_bytes, ml_bytes) = bytes.split_at(32);
+        let x_pk = XPublicKey::from(<[u8; 32]>::try_from(x_bytes).unwrap());
+        let ml_pk = EncapsulationKey::<MlKem1024Params>::from_bytes(
+            ml_bytes.try_into().map_err(|_| "Invalid ML-KEM public key")?
+        );
+        Ok(HybridPublicKey {
+            classic: x_pk,
+            quantum: ml_pk,
+        })
+    }
+}
+
+impl HybridSecretKey {
+    /// Serializes the hybrid secret key to bytes for FFI transfer.
+    /// Format: [32 bytes X25519 secret] + [3168 bytes ML-KEM-1024 secret key]
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(32 + 3168);
+        bytes.extend_from_slice(&self.classic.to_bytes());
+        bytes.extend_from_slice(&self.quantum.as_bytes());
+        bytes
+    }
+
+    /// Deserializes a hybrid secret key from bytes.
+    /// Format: [32 bytes X25519] + [3168 bytes ML-KEM-1024]
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        if bytes.len() != 32 + 3168 {
+            return Err("Invalid hybrid secret key length");
+        }
+        let (x_bytes, ml_bytes) = bytes.split_at(32);
+        let x_sk = XStaticSecret::from(<[u8; 32]>::try_from(x_bytes).unwrap());
+        let ml_sk = DecapsulationKey::<MlKem1024Params>::from_bytes(
+            ml_bytes.try_into().map_err(|_| "Invalid ML-KEM secret key")?
+        );
+        Ok(HybridSecretKey {
+            classic: x_sk,
+            quantum: ml_sk,
+        })
+    }
+}
+
 /// Combines classical and quantum entropy using BLAKE3 as a KDF.
 pub fn combine_secrets(classic: &[u8], quantum: &[u8]) -> SecretKeyMaterial {
     let mut hasher = Hasher::new();
