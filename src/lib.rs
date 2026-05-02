@@ -9,8 +9,10 @@
 //! and quantum exchanges is merged using BLAKE3 as a Key Derivation Function (KDF).
 
 pub mod crypto;
+pub mod ffi;
 pub mod ratchet;
 pub mod state;
+pub mod wasm;
 
 pub use crypto::{
     combine_secrets, generate_hybrid_keypair, hybrid_decapsulate, hybrid_encapsulate,
