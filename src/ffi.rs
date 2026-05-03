@@ -622,10 +622,7 @@ pub unsafe extern "C" fn pqa_save_atomic(
     let path = Path::new(path_str);
     
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
-    let key = match SecretKeyMaterial::from_bytes(key_bytes) {
-        Ok(k) => k,
-        Err(_) => return false,
-    };
+    let key = SecretKeyMaterial::from_bytes(key_bytes);
 
     state.save_atomic(path, &key).is_ok()
 }
@@ -650,10 +647,7 @@ pub unsafe extern "C" fn pqa_load_atomic(
     let path = Path::new(path_str);
     
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
-    let key = match SecretKeyMaterial::from_bytes(key_bytes) {
-        Ok(k) => k,
-        Err(_) => return std::ptr::null_mut(),
-    };
+    let key = SecretKeyMaterial::from_bytes(key_bytes);
 
     match RatchetState::load_atomic(path, &key) {
         Ok(state) => Box::into_raw(Box::new(state)),
