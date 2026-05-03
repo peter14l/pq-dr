@@ -7,6 +7,8 @@ use std::ffi::CStr;
 use std::path::Path;
 use std::ptr::null_mut;
 
+use std::os::raw::c_char;
+
 /// A simple FFI-friendly wrapper for a Message.
 #[repr(C)]
 pub struct FfiMessage {
@@ -558,13 +560,13 @@ pub unsafe extern "C" fn pqa_free_initial_message(msg_ptr: *mut FfiInitialMessag
 #[no_mangle]
 pub unsafe extern "C" fn pqa_save_atomic(
     state_ptr: *const RatchetState,
-    path_ptr: *const i8,
+    path_ptr: *const c_char,
     key_ptr: *const u8,
 ) -> bool {
     let state = &*state_ptr;
     let path_str = CStr::from_ptr(path_ptr).to_str().unwrap();
     let path = Path::new(path_str);
-
+    
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
     let key = SecretKeyMaterial::from_bytes(key_bytes);
 
@@ -578,12 +580,12 @@ pub unsafe extern "C" fn pqa_save_atomic(
 /// `key_ptr` must point to 32 bytes of key material.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_load_atomic(
-    path_ptr: *const i8,
+    path_ptr: *const c_char,
     key_ptr: *const u8,
 ) -> *mut RatchetState {
     let path_str = CStr::from_ptr(path_ptr).to_str().unwrap();
     let path = Path::new(path_str);
-
+    
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
     let key = SecretKeyMaterial::from_bytes(key_bytes);
 
