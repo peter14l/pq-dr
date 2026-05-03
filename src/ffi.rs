@@ -73,6 +73,9 @@ pub unsafe extern "C" fn pqa_encrypt(
     ad_ptr: *const u8,
     ad_len: usize,
 ) -> *mut FfiMessage {
+    if state_ptr.is_null() || plaintext_ptr.is_null() || ad_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
     let state = &mut *state_ptr;
     let plaintext = std::slice::from_raw_parts(plaintext_ptr, plaintext_len);
     let ad = std::slice::from_raw_parts(ad_ptr, ad_len);
@@ -108,6 +111,9 @@ pub unsafe extern "C" fn pqa_decrypt(
     ad_len: usize,
     out_len: *mut usize,
 ) -> *mut u8 {
+    if state_ptr.is_null() || header_ptr.is_null() || payload_ptr.is_null() || ad_ptr.is_null() || out_len.is_null() {
+        return std::ptr::null_mut();
+    }
     let state = &mut *state_ptr;
     let header_ciphertext = std::slice::from_raw_parts(header_ptr, header_len);
     let payload_ciphertext = std::slice::from_raw_parts(payload_ptr, payload_len);
@@ -226,9 +232,14 @@ pub unsafe extern "C" fn pqa_create_bundle(
     identity_pk_ptr: *const u8,
     identity_pk_len: usize,
 ) -> *mut FfiPreKeyBundle {
+    if identity_pk_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
     let identity_pk_bytes = std::slice::from_raw_parts(identity_pk_ptr, identity_pk_len);
-    let identity_pk: HybridPublicKey =
-        HybridPublicKey::from_bytes(identity_pk_bytes).expect("Invalid identity public key");
+    let identity_pk = match HybridPublicKey::from_bytes(identity_pk_bytes) {
+        Ok(pk) => pk,
+        Err(_) => return null_mut(),
+    };
 
     let mut rng = thread_rng();
 
@@ -316,17 +327,26 @@ pub unsafe extern "C" fn pqa_init_alice(
     local_identity_sk_ptr: *const u8,
     local_identity_sk_len: usize,
 ) -> *mut FfiInitialMessage {
+    if remote_bundle_ptr.is_null() || local_identity_pk_ptr.is_null() || local_identity_sk_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
     let remote_bundle_bytes = std::slice::from_raw_parts(remote_bundle_ptr, remote_bundle_len);
-    let remote_bundle: PreKeyBundle =
-        serde_json::from_slice(remote_bundle_bytes).expect("Invalid remote bundle");
+    let remote_bundle: PreKeyBundle = match serde_json::from_slice(remote_bundle_bytes) {
+        Ok(bundle) => bundle,
+        Err(_) => return null_mut(),
+    };
 
     let local_pk_bytes = std::slice::from_raw_parts(local_identity_pk_ptr, local_identity_pk_len);
-    let local_identity_pk =
-        HybridPublicKey::from_bytes(local_pk_bytes).expect("Invalid local identity public key");
+    let local_identity_pk = match HybridPublicKey::from_bytes(local_pk_bytes) {
+        Ok(pk) => pk,
+        Err(_) => return null_mut(),
+    };
 
     let local_sk_bytes = std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
-    let local_identity_sk =
-        HybridSecretKey::from_bytes(local_sk_bytes).expect("Invalid local identity secret key");
+    let local_identity_sk = match HybridSecretKey::from_bytes(local_sk_bytes) {
+        Ok(sk) => sk,
+        Err(_) => return null_mut(),
+    };
 
     let mut rng = thread_rng();
     let (state, initial_msg, _root_key) = HandshakeEngine::initiate_alice(
@@ -409,39 +429,53 @@ pub unsafe extern "C" fn pqa_init_bob(
     local_ot_sk_len: usize,
     has_ot_sk: bool,
 ) -> *mut RatchetState {
+    if initial_msg_ptr.is_null() || local_identity_pk_ptr.is_null() || local_identity_sk_ptr.is_null() || local_signed_sk_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
     let initial_msg_bytes = std::slice::from_raw_parts(initial_msg_ptr, initial_msg_len);
-    let initial_msg: InitialMessage =
-        serde_json::from_slice(initial_msg_bytes).expect("Invalid initial message");
+    let initial_msg: InitialMessage = match serde_json::from_slice(initial_msg_bytes) {
+        Ok(msg) => msg,
+        Err(_) => return null_mut(),
+    };
 
     let local_pk_bytes = std::slice::from_raw_parts(local_identity_pk_ptr, local_identity_pk_len);
-    let local_identity_pk =
-        HybridPublicKey::from_bytes(local_pk_bytes).expect("Invalid local identity public key");
+    let local_identity_pk = match HybridPublicKey::from_bytes(local_pk_bytes) {
+        Ok(pk) => pk,
+        Err(_) => return null_mut(),
+    };
 
     let local_sk_bytes = std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
-    let local_identity_sk =
-        HybridSecretKey::from_bytes(local_sk_bytes).expect("Invalid local identity secret key");
+    let local_identity_sk = match HybridSecretKey::from_bytes(local_sk_bytes) {
+        Ok(sk) => sk,
+        Err(_) => return null_mut(),
+    };
 
     let signed_sk_bytes = std::slice::from_raw_parts(local_signed_sk_ptr, local_signed_sk_len);
-    let local_signed_sk =
-        HybridSecretKey::from_bytes(signed_sk_bytes).expect("Invalid signed secret key");
+    let local_signed_sk = match HybridSecretKey::from_bytes(signed_sk_bytes) {
+        Ok(sk) => sk,
+        Err(_) => return null_mut(),
+    };
 
     let local_ot_sk = if has_ot_sk && !local_ot_sk_ptr.is_null() {
         let ot_sk_bytes = std::slice::from_raw_parts(local_ot_sk_ptr, local_ot_sk_len);
-        Some(HybridSecretKey::from_bytes(ot_sk_bytes).expect("Invalid one-time secret key"))
+        match HybridSecretKey::from_bytes(ot_sk_bytes) {
+            Ok(sk) => Some(sk),
+            Err(_) => return null_mut(),
+        }
     } else {
         None
     };
 
-    let (state, _root_key) = HandshakeEngine::respond_bob(
+    match HandshakeEngine::respond_bob(
         &initial_msg,
         &local_identity_pk,
         &local_identity_sk,
         &local_signed_sk,
         local_ot_sk.as_ref(),
-    )
-    .expect("Failed to respond to initial message");
-
-    Box::into_raw(Box::new(state))
+    ) {
+        Ok((state, _root_key)) => Box::into_raw(Box::new(state)),
+        Err(_) => null_mut(),
+    }
 }
 
 // ============================================================================
@@ -455,9 +489,14 @@ pub unsafe extern "C" fn pqa_init_bob(
 /// Returns a pointer to the serialized bytes. Caller must free with pqa_free_buffer.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_serialize_state(state_ptr: *const RatchetState) -> *mut u8 {
+    if state_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
     let state = &*state_ptr;
-    let serialized = serde_json::to_vec(state).expect("Failed to serialize state");
-    Box::into_raw(serialized.into_boxed_slice()) as *mut u8
+    match serde_json::to_vec(state) {
+        Ok(serialized) => Box::into_raw(serialized.into_boxed_slice()) as *mut u8,
+        Err(_) => std::ptr::null_mut(),
+    }
 }
 
 /// Returns the length of the serialized state (call this first to allocate buffer).
@@ -466,10 +505,14 @@ pub unsafe extern "C" fn pqa_serialize_state(state_ptr: *const RatchetState) -> 
 /// `state_ptr` must be a valid pointer to a RatchetState.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_serialize_state_len(state_ptr: *const RatchetState) -> usize {
+    if state_ptr.is_null() {
+        return 0;
+    }
     let state = &*state_ptr;
-    serde_json::to_vec(state)
-        .expect("Failed to serialize state")
-        .len()
+    match serde_json::to_vec(state) {
+        Ok(v) => v.len(),
+        Err(_) => 0,
+    }
 }
 
 /// Deserializes bytes back into a RatchetState.
@@ -482,9 +525,14 @@ pub unsafe extern "C" fn pqa_deserialize_state(
     bytes_ptr: *const u8,
     bytes_len: usize,
 ) -> *mut RatchetState {
+    if bytes_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
     let bytes = std::slice::from_raw_parts(bytes_ptr, bytes_len);
-    let state: RatchetState = serde_json::from_slice(bytes).expect("Failed to deserialize state");
-    Box::into_raw(Box::new(state))
+    match serde_json::from_slice::<RatchetState>(bytes) {
+        Ok(state) => Box::into_raw(Box::new(state)),
+        Err(_) => std::ptr::null_mut(),
+    }
 }
 
 /// Frees a RatchetState allocated by the FFI.
@@ -563,12 +611,21 @@ pub unsafe extern "C" fn pqa_save_atomic(
     path_ptr: *const c_char,
     key_ptr: *const u8,
 ) -> bool {
+    if state_ptr.is_null() || path_ptr.is_null() || key_ptr.is_null() {
+        return false;
+    }
     let state = &*state_ptr;
-    let path_str = CStr::from_ptr(path_ptr).to_str().unwrap();
+    let path_str = match CStr::from_ptr(path_ptr).to_str() {
+        Ok(s) => s,
+        Err(_) => return false,
+    };
     let path = Path::new(path_str);
     
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
-    let key = SecretKeyMaterial::from_bytes(key_bytes);
+    let key = match SecretKeyMaterial::from_bytes(key_bytes) {
+        Ok(k) => k,
+        Err(_) => return false,
+    };
 
     state.save_atomic(path, &key).is_ok()
 }
@@ -583,11 +640,20 @@ pub unsafe extern "C" fn pqa_load_atomic(
     path_ptr: *const c_char,
     key_ptr: *const u8,
 ) -> *mut RatchetState {
-    let path_str = CStr::from_ptr(path_ptr).to_str().unwrap();
+    if path_ptr.is_null() || key_ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let path_str = match CStr::from_ptr(path_ptr).to_str() {
+        Ok(s) => s,
+        Err(_) => return std::ptr::null_mut(),
+    };
     let path = Path::new(path_str);
     
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
-    let key = SecretKeyMaterial::from_bytes(key_bytes);
+    let key = match SecretKeyMaterial::from_bytes(key_bytes) {
+        Ok(k) => k,
+        Err(_) => return std::ptr::null_mut(),
+    };
 
     match RatchetState::load_atomic(path, &key) {
         Ok(state) => Box::into_raw(Box::new(state)),

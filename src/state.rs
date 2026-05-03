@@ -52,9 +52,11 @@ pub struct RatchetState {
 
     /// FIFO queue for skipped keys to manage memory.
     #[zeroize(skip)]
+    #[serde(default)]
     pub skipped_keys_fifo: VecDeque<(HybridPublicKey, u32)>,
 
     /// Pending KEM ciphertext to be sent in the next header
+    #[serde(default)]
     pub pending_kem_ciphertext: Vec<u8>,
 }
 
