@@ -1,6 +1,7 @@
 use crate::crypto::{HybridPublicKey, HybridSecretKey, SecretKeyMaterial};
+use rand_core::RngCore;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// State of a single symmetric chain (either sending or receiving).
@@ -49,6 +50,10 @@ pub struct RatchetState {
     #[zeroize(skip)]
     pub skipped_msg_keys: HashMap<(HybridPublicKey, u32), SecretKeyMaterial>,
 
+    /// FIFO queue for skipped keys to manage memory.
+    #[zeroize(skip)]
+    pub skipped_keys_fifo: VecDeque<(HybridPublicKey, u32)>,
+
     /// Pending KEM ciphertext to be sent in the next header
     pub pending_kem_ciphertext: Vec<u8>,
 }
@@ -61,7 +66,7 @@ impl RatchetState {
         local_pk: HybridPublicKey,
         local_sk: HybridSecretKey,
     ) -> Self {
-        let (h_key, _) = crate::crypto::kdf_step(&root_key, b"Initial Header Key");
+        let (h_key, _) = crate::crypto::kdf_header_step(&root_key);
         Self {
             root_key,
             dh_sk: Some(local_sk),
@@ -77,6 +82,7 @@ impl RatchetState {
             }),
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
+            skipped_keys_fifo: VecDeque::new(),
             pending_kem_ciphertext: Vec::new(),
         }
     }
@@ -87,7 +93,7 @@ impl RatchetState {
         local_pk: HybridPublicKey,
         local_sk: HybridSecretKey,
     ) -> Self {
-        let (h_key, _) = crate::crypto::kdf_step(&root_key, b"Initial Header Key");
+        let (h_key, _) = crate::crypto::kdf_header_step(&root_key);
         Self {
             root_key,
             dh_sk: Some(local_sk),
@@ -104,6 +110,7 @@ impl RatchetState {
             }),
             prev_send_len: 0,
             skipped_msg_keys: HashMap::new(),
+            skipped_keys_fifo: VecDeque::new(),
             pending_kem_ciphertext: Vec::new(),
         }
     }
@@ -132,6 +139,58 @@ impl RatchetState {
         let decrypted =
             crate::crypto::decrypt(encryption_key, nonce, b"PQ-Aura State Export", ciphertext)?;
         serde_json::from_slice(&decrypted).map_err(|_| "Failed to deserialize state")
+    }
+
+    /// Atomically saves the encrypted state to a file.
+    /// Uses a "Shadow Save" pattern: writes to .tmp then renames to target.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn save_atomic(
+        &self,
+        path: &std::path::Path,
+        encryption_key: &SecretKeyMaterial,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        use std::io::Write;
+
+        // 1. Generate a random nonce for this save
+        let mut nonce = [0u8; 12];
+        rand::thread_rng().fill_bytes(&mut nonce);
+
+        // 2. Encrypt state
+        let encrypted = self.export_state(encryption_key, &nonce)?;
+
+        // 3. Create temp file path
+        let tmp_path = path.with_extension("tmp");
+
+        // 4. Write to temp file
+        {
+            let mut file = std::fs::File::create(&tmp_path)?;
+            file.write_all(&nonce)?; // Prepend nonce for next import
+            file.write_all(&encrypted)?;
+            file.sync_all()?; // Ensure bits hit the platter
+        }
+
+        // 5. Atomic rename
+        std::fs::rename(&tmp_path, path)?;
+
+        Ok(())
+    }
+
+    /// Loads the state from an atomically saved file.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn load_atomic(
+        path: &std::path::Path,
+        encryption_key: &SecretKeyMaterial,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        use std::io::Read;
+        let mut file = std::fs::File::open(path)?;
+        let mut nonce = [0u8; 12];
+        file.read_exact(&mut nonce)?;
+
+        let mut encrypted = Vec::new();
+        file.read_to_end(&mut encrypted)?;
+
+        Ok(Self::import_state(encryption_key, &nonce, &encrypted)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?)
     }
 }
 

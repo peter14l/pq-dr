@@ -15,6 +15,12 @@ pub struct Header {
     pub n: u32,
 }
 
+impl Header {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        serde_json::from_slice(bytes).map_err(|_| "Invalid header format")
+    }
+}
+
 /// A complete PQ-Aura message.
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Message {
@@ -44,7 +50,7 @@ impl RatchetEngine {
             .send_chain
             .as_mut()
             .expect("Send chain not initialized");
-        let (new_chain_key, msg_key) = crypto::kdf_step(&chain.key, b"Message Key");
+        let (new_chain_key, msg_key) = crypto::kdf_chain_step(&chain.key);
         chain.key = new_chain_key;
         let n = chain.index;
         chain.index += 1;
@@ -64,15 +70,14 @@ impl RatchetEngine {
             .expect("Header chain not initialized");
         let header_bytes = serde_json::to_vec(&header).unwrap();
 
-        let mut header_nonce = [0u8; 12];
-        header_nonce[0..4].copy_from_slice(&header_chain.index.to_le_bytes());
+        let header_nonce = crypto::generate_nonce(header_chain.index, 0); // Label 0 for header
         header_chain.index += 1;
 
         let header_ciphertext =
             crypto::encrypt(&header_chain.key, &header_nonce, ad, &header_bytes);
 
         // 4. Encrypt the payload.
-        let payload_nonce = [1u8; 12]; // Safe because msg_key is unique per message.
+        let payload_nonce = crypto::generate_nonce(n, 1); // Label 1 for payload
         let payload_ciphertext =
             crypto::encrypt(&msg_key, &payload_nonce, &header_ciphertext, plaintext);
 
@@ -97,14 +102,9 @@ impl RatchetEngine {
             .skipped_msg_keys
             .remove(&(header.dh_pk.clone(), header.n))
         {
-            // Update the index of the header chain that worked
-            if is_new_ratchet {
-                // This is unusual for a skipped key, but let's be robust.
-            } else if let Some(h_chain) = state.recv_header_chain.as_mut() {
-                h_chain.index = std::cmp::max(h_chain.index, try_idx + 1);
-            }
+            // Update FIFO if needed (optional cleanup)
 
-            let payload_nonce = [1u8; 12];
+            let payload_nonce = crypto::generate_nonce(header.n, 1);
             return crypto::decrypt(
                 &msg_key,
                 &payload_nonce,
@@ -131,11 +131,12 @@ impl RatchetEngine {
             .recv_chain
             .as_mut()
             .ok_or("Receiving chain not initialized")?;
-        let (new_chain_key, msg_key) = crypto::kdf_step(&chain.key, b"Message Key");
+        let (new_chain_key, msg_key) = crypto::kdf_chain_step(&chain.key);
         chain.key = new_chain_key;
+        let n = chain.index;
         chain.index += 1;
 
-        let payload_nonce = [1u8; 12];
+        let payload_nonce = crypto::generate_nonce(n, 1);
         crypto::decrypt(
             &msg_key,
             &payload_nonce,
@@ -154,12 +155,11 @@ impl RatchetEngine {
             let start = h_chain.index.saturating_sub(10);
             let end = h_chain.index + 10;
             for try_idx in start..end {
-                let mut header_nonce = [0u8; 12];
-                header_nonce[0..4].copy_from_slice(&try_idx.to_le_bytes());
+                let header_nonce = crypto::generate_nonce(try_idx, 0);
                 if let Ok(header_bytes) =
                     crypto::decrypt(&h_chain.key, &header_nonce, ad, &message.header_ciphertext)
                 {
-                    if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
+                    if let Ok(header) = Header::from_bytes(&header_bytes) {
                         return Ok((header, false, try_idx, h_chain.clone()));
                     }
                 }
@@ -171,12 +171,11 @@ impl RatchetEngine {
             let start = h_chain.index.saturating_sub(10);
             let end = h_chain.index + 10;
             for try_idx in start..end {
-                let mut header_nonce = [0u8; 12];
-                header_nonce[0..4].copy_from_slice(&try_idx.to_le_bytes());
+                let header_nonce = crypto::generate_nonce(try_idx, 0);
                 if let Ok(header_bytes) =
                     crypto::decrypt(&h_chain.key, &header_nonce, ad, &message.header_ciphertext)
                 {
-                    if let Ok(header) = serde_json::from_slice::<Header>(&header_bytes) {
+                    if let Ok(header) = Header::from_bytes(&header_bytes) {
                         return Ok((header, true, try_idx, h_chain.clone()));
                     }
                 }
@@ -196,18 +195,31 @@ impl RatchetEngine {
         }
         let remote_pk = state.remote_dh_pk.as_ref().ok_or("No remote public key")?;
         let chain = state.recv_chain.as_mut().unwrap();
+
         if chain.index > until {
-            // Check skipped keys
-            return Err("Message already processed or sequence error");
+            return Ok(());
         }
-        if until - chain.index > MAX_SKIP {
+
+        let num_to_skip = until - chain.index;
+        if num_to_skip > MAX_SKIP {
             return Err("Too many messages to skip (DoS protection)");
         }
+
         while chain.index < until {
-            let (new_chain_key, msg_key) = crypto::kdf_step(&chain.key, b"Message Key");
-            state
-                .skipped_msg_keys
-                .insert((remote_pk.clone(), chain.index), msg_key);
+            let (new_chain_key, msg_key) = crypto::kdf_chain_step(&chain.key);
+
+            let key_id = (remote_pk.clone(), chain.index);
+
+            // Production-grade FIFO eviction:
+            if state.skipped_msg_keys.len() >= MAX_SKIP as usize {
+                if let Some(oldest_key) = state.skipped_keys_fifo.pop_front() {
+                    state.skipped_msg_keys.remove(&oldest_key);
+                }
+            }
+
+            state.skipped_msg_keys.insert(key_id.clone(), msg_key);
+            state.skipped_keys_fifo.push_back(key_id);
+
             chain.key = new_chain_key;
             chain.index += 1;
         }
@@ -218,10 +230,10 @@ impl RatchetEngine {
         let remote_pk = state.remote_dh_pk.as_ref().expect("No remote public key");
         let (shared_secret, ct) = crypto::hybrid_encapsulate(remote_pk, rng);
         state.pending_kem_ciphertext = ct;
-        let (new_root, new_send_chain) = crypto::kdf_step(&state.root_key, shared_secret.as_ref());
+        let (new_root, new_send_chain) = crypto::kdf_root_step(&state.root_key, &shared_secret);
 
         // Derive header keys: one for the current chain, and one for the next potential chain.
-        let (send_h_key, next_h_key) = crypto::kdf_step(&new_root, b"Header Keys");
+        let (send_h_key, next_h_key) = crypto::kdf_header_step(&new_root);
 
         // Use current next_recv_header_chain for this outgoing step.
         if let Some(initial_h_chain) = state.next_recv_header_chain.take() {
@@ -258,10 +270,10 @@ impl RatchetEngine {
         )
         .map_err(|_| "Decapsulation failed")?;
 
-        let (new_root, new_recv_chain) = crypto::kdf_step(&state.root_key, shared_secret.as_ref());
+        let (new_root, new_recv_chain) = crypto::kdf_root_step(&state.root_key, &shared_secret);
 
         // Derive the header key for the NEXT ratchet.
-        let (_, next_h_key) = crypto::kdf_step(&new_root, b"Header Keys");
+        let (_, next_h_key) = crypto::kdf_header_step(&new_root);
 
         state.root_key = new_root;
         state.recv_chain = Some(ChainState {

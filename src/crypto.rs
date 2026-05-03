@@ -43,12 +43,27 @@ pub struct HybridPublicKey {
 
 impl PartialEq for HybridPublicKey {
     fn eq(&self, other: &Self) -> bool {
-        self.classic.as_bytes() == other.classic.as_bytes()
-            && self.quantum.as_bytes() == other.quantum.as_bytes()
+        let x_eq = self.classic.as_bytes().ct_eq(other.classic.as_bytes());
+        let ml_eq = (&self.quantum.as_bytes()[..]).ct_eq(&other.quantum.as_bytes()[..]);
+        (x_eq & ml_eq).into()
     }
 }
 
 impl Eq for HybridPublicKey {}
+
+impl ConstantTimeEq for SecretKeyMaterial {
+    fn ct_eq(&self, other: &Self) -> subtle::Choice {
+        self.0.ct_eq(&other.0)
+    }
+}
+
+impl PartialEq for SecretKeyMaterial {
+    fn eq(&self, other: &Self) -> bool {
+        self.ct_eq(other).into()
+    }
+}
+
+impl Eq for SecretKeyMaterial {}
 
 impl Hash for HybridPublicKey {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -115,7 +130,9 @@ impl HybridPublicKey {
         let (x_bytes, ml_bytes) = bytes.split_at(32);
         let x_pk = XPublicKey::from(<[u8; 32]>::try_from(x_bytes).unwrap());
         let ml_pk = EncapsulationKey::<MlKem1024Params>::from_bytes(
-            ml_bytes.try_into().map_err(|_| "Invalid ML-KEM public key")?
+            ml_bytes
+                .try_into()
+                .map_err(|_| "Invalid ML-KEM public key")?,
         );
         Ok(HybridPublicKey {
             classic: x_pk,
@@ -143,7 +160,9 @@ impl HybridSecretKey {
         let (x_bytes, ml_bytes) = bytes.split_at(32);
         let x_sk = XStaticSecret::from(<[u8; 32]>::try_from(x_bytes).unwrap());
         let ml_sk = DecapsulationKey::<MlKem1024Params>::from_bytes(
-            ml_bytes.try_into().map_err(|_| "Invalid ML-KEM secret key")?
+            ml_bytes
+                .try_into()
+                .map_err(|_| "Invalid ML-KEM secret key")?,
         );
         Ok(HybridSecretKey {
             classic: x_sk,
@@ -246,14 +265,20 @@ pub fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
     a.ct_eq(b).into()
 }
 
-/// KDF for generating new keys from a root key using BLAKE3 XOF.
-pub fn kdf_step(
+/// Domain labels for different KDF operations.
+pub const KDF_LABEL_ROOT: &str = "PQ-Aura v1: Root Ratchet";
+pub const KDF_LABEL_CHAIN: &str = "PQ-Aura v1: Message Chain";
+pub const KDF_LABEL_HEADER: &str = "PQ-Aura v1: Header Key";
+pub const KDF_LABEL_STATE: &str = "PQ-Aura v1: State Export";
+
+/// KDF for the Root Ratchet. Mixes the current root key with a new shared secret.
+pub fn kdf_root_step(
     root_key: &SecretKeyMaterial,
-    info: &[u8],
+    shared_secret: &SecretKeyMaterial,
 ) -> (SecretKeyMaterial, SecretKeyMaterial) {
-    let mut hasher = Hasher::new_derive_key("PQ-Aura KDF Context");
+    let mut hasher = Hasher::new_derive_key(KDF_LABEL_ROOT);
     hasher.update(root_key.as_ref());
-    hasher.update(info);
+    hasher.update(shared_secret.as_ref());
 
     let mut reader = hasher.finalize_xof();
     let mut okm = [0u8; 64];
@@ -264,6 +289,46 @@ pub fn kdf_step(
         SecretKeyMaterial(<[u8; 32]>::try_from(new_root).unwrap()),
         SecretKeyMaterial(<[u8; 32]>::try_from(new_chain).unwrap()),
     )
+}
+
+/// KDF for the Message Chain. Advances the chain key and produces a message key.
+pub fn kdf_chain_step(chain_key: &SecretKeyMaterial) -> (SecretKeyMaterial, SecretKeyMaterial) {
+    let mut hasher = Hasher::new_derive_key(KDF_LABEL_CHAIN);
+    hasher.update(chain_key.as_ref());
+
+    let mut reader = hasher.finalize_xof();
+    let mut okm = [0u8; 64];
+    reader.fill(&mut okm);
+
+    let (new_chain, msg_key) = okm.split_at(32);
+    (
+        SecretKeyMaterial(<[u8; 32]>::try_from(new_chain).unwrap()),
+        SecretKeyMaterial(<[u8; 32]>::try_from(msg_key).unwrap()),
+    )
+}
+
+/// KDF for Header Key derivation.
+pub fn kdf_header_step(root_key: &SecretKeyMaterial) -> (SecretKeyMaterial, SecretKeyMaterial) {
+    let mut hasher = Hasher::new_derive_key(KDF_LABEL_HEADER);
+    hasher.update(root_key.as_ref());
+
+    let mut reader = hasher.finalize_xof();
+    let mut okm = [0u8; 64];
+    reader.fill(&mut okm);
+
+    let (header_key, next_header_key) = okm.split_at(32);
+    (
+        SecretKeyMaterial(<[u8; 32]>::try_from(header_key).unwrap()),
+        SecretKeyMaterial(<[u8; 32]>::try_from(next_header_key).unwrap()),
+    )
+}
+
+/// Generates a unique nonce for a given index and label.
+pub fn generate_nonce(index: u32, label: u8) -> [u8; 12] {
+    let mut nonce = [0u8; 12];
+    nonce[0] = label;
+    nonce[1..5].copy_from_slice(&index.to_le_bytes());
+    nonce
 }
 
 mod serde_bytes_fixed {
