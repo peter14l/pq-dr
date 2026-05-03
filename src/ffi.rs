@@ -411,8 +411,9 @@ pub unsafe extern "C" fn pqa_init_bob(
     let initial_msg: InitialMessage =
         serde_json::from_slice(initial_msg_bytes).expect("Invalid initial message");
 
-    // Use the identity pk from the initial message (sent by Alice)
-    let local_identity_pk = initial_msg.alice_identity_pk.clone();
+    let local_pk_bytes = std::slice::from_raw_parts(local_identity_pk_ptr, local_identity_pk_len);
+    let local_identity_pk =
+        HybridPublicKey::from_bytes(local_pk_bytes).expect("Invalid local identity public key");
 
     let local_sk_bytes = std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
     let local_identity_sk =

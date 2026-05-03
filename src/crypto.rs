@@ -21,6 +21,14 @@ pub const KEY_LEN: usize = 32;
 #[derive(Clone, Serialize, Deserialize, Zeroize, ZeroizeOnDrop)]
 pub struct SecretKeyMaterial(#[serde(with = "serde_bytes_fixed")] pub [u8; KEY_LEN]);
 
+impl SecretKeyMaterial {
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        let mut key = [0u8; KEY_LEN];
+        key.copy_from_slice(bytes);
+        Self(key)
+    }
+}
+
 impl Default for SecretKeyMaterial {
     fn default() -> Self {
         Self([0u8; KEY_LEN])
