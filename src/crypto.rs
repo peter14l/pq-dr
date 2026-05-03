@@ -52,7 +52,7 @@ pub struct HybridPublicKey {
 impl PartialEq for HybridPublicKey {
     fn eq(&self, other: &Self) -> bool {
         let x_eq = self.classic.as_bytes().ct_eq(other.classic.as_bytes());
-        let ml_eq = (&self.quantum.as_bytes()[..]).ct_eq(&other.quantum.as_bytes()[..]);
+        let ml_eq = self.quantum.as_bytes()[..].ct_eq(&other.quantum.as_bytes()[..]);
         (x_eq & ml_eq).into()
     }
 }

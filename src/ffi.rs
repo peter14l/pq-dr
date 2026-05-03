@@ -336,7 +336,7 @@ pub unsafe extern "C" fn pqa_init_alice(
 
     // Box the state and get pointer
     let state_box = Box::new(state);
-    let state_ptr = Box::into_raw(state_box) as *mut RatchetState;
+    let state_ptr = Box::into_raw(state_box);
 
     // Build FFI InitialMessage
     // Serialize keys using to_bytes() - save lengths BEFORE moving
@@ -364,7 +364,7 @@ pub unsafe extern "C" fn pqa_init_alice(
         alice_identity_pk: Box::into_raw(alice_pk_bytes.into_boxed_slice()) as *mut u8,
         alice_identity_pk_len: alice_pk_len,
         ephemeral_pk: Box::into_raw(ephemeral_pk_bytes.into_boxed_slice()) as *mut u8,
-        ephemeral_pk_len: ephemeral_pk_len,
+        ephemeral_pk_len,
         kem_ciphertext_identity: Box::into_raw(kem_identity.into_boxed_slice()) as *mut u8,
         kem_ciphertext_identity_len: kem_identity_len,
         kem_ciphertext_signed: Box::into_raw(kem_signed.into_boxed_slice()) as *mut u8,
