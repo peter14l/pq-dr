@@ -1,8 +1,10 @@
 use crate::crypto::{self, HybridPublicKey, HybridSecretKey, SecretKeyMaterial};
-use crate::handshake::{HandshakeEngine, PreKeyBundle, InitialMessage};
+use crate::handshake::{HandshakeEngine, InitialMessage, PreKeyBundle};
 use crate::ratchet::{Message, RatchetEngine};
 use crate::state::RatchetState;
 use rand::thread_rng;
+use std::ffi::CStr;
+use std::path::Path;
 use std::ptr::null_mut;
 
 /// A simple FFI-friendly wrapper for a Message.
@@ -20,7 +22,7 @@ pub struct FfiMessage {
 pub struct FfiKeyPair {
     pub public_key: *mut u8,
     pub public_key_len: usize,
-    pub secret_key: *mut u8,  // Opaque handle - in Rust we keep the secret internally
+    pub secret_key: *mut u8, // Opaque handle - in Rust we keep the secret internally
     pub secret_key_len: usize,
 }
 
@@ -39,7 +41,7 @@ pub struct FfiPreKeyBundle {
 /// FFI-friendly wrapper for an InitialMessage.
 #[repr(C)]
 pub struct FfiInitialMessage {
-    pub state_ptr: *mut RatchetState,  // Alice's new state
+    pub state_ptr: *mut RatchetState, // Alice's new state
     pub alice_identity_pk: *mut u8,
     pub alice_identity_pk_len: usize,
     pub ephemeral_pk: *mut u8,
@@ -76,7 +78,7 @@ pub unsafe extern "C" fn pqa_encrypt(
 
     let msg = RatchetEngine::encrypt(state, plaintext, ad, &mut rng);
 
-    let header_vec = serde_json::to_vec(&msg.header_ciphertext).unwrap();
+    let header_vec = msg.header_ciphertext;
     let payload_vec = msg.payload_ciphertext;
 
     let ffi_msg = Box::new(FfiMessage {
@@ -172,7 +174,7 @@ pub unsafe extern "C" fn pqa_generate_keypair() -> *mut FfiKeyPair {
     // Serialize keys to bytes using to_bytes() for FFI-friendly format
     let pk_bytes = public_key.to_bytes();
     let sk_bytes = secret_key.to_bytes();
-    
+
     // Save lengths before moving the vectors
     let pk_len = pk_bytes.len();
     let sk_len = sk_bytes.len();
@@ -316,19 +318,21 @@ pub unsafe extern "C" fn pqa_init_alice(
     let remote_bundle: PreKeyBundle =
         serde_json::from_slice(remote_bundle_bytes).expect("Invalid remote bundle");
 
-    let local_pk_bytes =
-        std::slice::from_raw_parts(local_identity_pk_ptr, local_identity_pk_len);
+    let local_pk_bytes = std::slice::from_raw_parts(local_identity_pk_ptr, local_identity_pk_len);
     let local_identity_pk =
         HybridPublicKey::from_bytes(local_pk_bytes).expect("Invalid local identity public key");
 
-    let local_sk_bytes =
-        std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
+    let local_sk_bytes = std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
     let local_identity_sk =
         HybridSecretKey::from_bytes(local_sk_bytes).expect("Invalid local identity secret key");
 
     let mut rng = thread_rng();
-    let (state, initial_msg, _root_key) =
-        HandshakeEngine::initiate_alice(&remote_bundle, &local_identity_pk, &local_identity_sk, &mut rng);
+    let (state, initial_msg, _root_key) = HandshakeEngine::initiate_alice(
+        &remote_bundle,
+        &local_identity_pk,
+        &local_identity_sk,
+        &mut rng,
+    );
 
     // Box the state and get pointer
     let state_box = Box::new(state);
@@ -340,7 +344,7 @@ pub unsafe extern "C" fn pqa_init_alice(
     let alice_pk_len = alice_pk_bytes.len();
     let ephemeral_pk_bytes = initial_msg.ephemeral_pk.to_bytes();
     let ephemeral_pk_len = ephemeral_pk_bytes.len();
-    
+
     let kem_identity = initial_msg.kem_ciphertext_identity.clone();
     let kem_identity_len = kem_identity.len();
     let kem_signed = initial_msg.kem_ciphertext_signed.clone();
@@ -348,7 +352,7 @@ pub unsafe extern "C" fn pqa_init_alice(
     let kem_one_time = initial_msg.kem_ciphertext_one_time.clone();
     let kem_one_time_len = kem_one_time.as_ref().map(|v| v.len()).unwrap_or(0);
     let has_one_time = kem_one_time.is_some();
-    
+
     // Serialize the ratchet message
     let header_bytes = initial_msg.ratchet_message.header_ciphertext.clone();
     let header_len = header_bytes.len();
@@ -410,27 +414,29 @@ pub unsafe extern "C" fn pqa_init_bob(
     // Use the identity pk from the initial message (sent by Alice)
     let local_identity_pk = initial_msg.alice_identity_pk.clone();
 
-    let local_sk_bytes =
-        std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
+    let local_sk_bytes = std::slice::from_raw_parts(local_identity_sk_ptr, local_identity_sk_len);
     let local_identity_sk =
         HybridSecretKey::from_bytes(local_sk_bytes).expect("Invalid local identity secret key");
 
-    let signed_sk_bytes =
-        std::slice::from_raw_parts(local_signed_sk_ptr, local_signed_sk_len);
+    let signed_sk_bytes = std::slice::from_raw_parts(local_signed_sk_ptr, local_signed_sk_len);
     let local_signed_sk =
         HybridSecretKey::from_bytes(signed_sk_bytes).expect("Invalid signed secret key");
 
     let local_ot_sk = if has_ot_sk && !local_ot_sk_ptr.is_null() {
         let ot_sk_bytes = std::slice::from_raw_parts(local_ot_sk_ptr, local_ot_sk_len);
-        Some(HybridSecretKey::from_bytes(ot_sk_bytes)
-            .expect("Invalid one-time secret key"))
+        Some(HybridSecretKey::from_bytes(ot_sk_bytes).expect("Invalid one-time secret key"))
     } else {
         None
     };
 
-    let (state, _root_key) =
-        HandshakeEngine::respond_bob(&initial_msg, &local_identity_pk, &local_identity_sk, &local_signed_sk, local_ot_sk.as_ref())
-            .expect("Failed to respond to initial message");
+    let (state, _root_key) = HandshakeEngine::respond_bob(
+        &initial_msg,
+        &local_identity_pk,
+        &local_identity_sk,
+        &local_signed_sk,
+        local_ot_sk.as_ref(),
+    )
+    .expect("Failed to respond to initial message");
 
     Box::into_raw(Box::new(state))
 }
@@ -458,7 +464,9 @@ pub unsafe extern "C" fn pqa_serialize_state(state_ptr: *const RatchetState) -> 
 #[no_mangle]
 pub unsafe extern "C" fn pqa_serialize_state_len(state_ptr: *const RatchetState) -> usize {
     let state = &*state_ptr;
-    serde_json::to_vec(state).expect("Failed to serialize state").len()
+    serde_json::to_vec(state)
+        .expect("Failed to serialize state")
+        .len()
 }
 
 /// Deserializes bytes back into a RatchetState.
@@ -472,8 +480,7 @@ pub unsafe extern "C" fn pqa_deserialize_state(
     bytes_len: usize,
 ) -> *mut RatchetState {
     let bytes = std::slice::from_raw_parts(bytes_ptr, bytes_len);
-    let state: RatchetState =
-        serde_json::from_slice(bytes).expect("Failed to deserialize state");
+    let state: RatchetState = serde_json::from_slice(bytes).expect("Failed to deserialize state");
     Box::into_raw(Box::new(state))
 }
 
@@ -539,5 +546,48 @@ pub unsafe extern "C" fn pqa_free_initial_message(msg_ptr: *mut FfiInitialMessag
             msg.ratchet_message_payload,
             msg.ratchet_message_payload_len,
         ));
+    }
+}
+
+/// Atomically saves the state to a file.
+///
+/// # Safety
+/// `path_ptr` must be a null-terminated UTF-8 string.
+/// `key_ptr` must point to 32 bytes of key material.
+#[no_mangle]
+pub unsafe extern "C" fn pqa_save_atomic(
+    state_ptr: *const RatchetState,
+    path_ptr: *const i8,
+    key_ptr: *const u8,
+) -> bool {
+    let state = &*state_ptr;
+    let path_str = CStr::from_ptr(path_ptr).to_str().unwrap();
+    let path = Path::new(path_str);
+
+    let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
+    let key = SecretKeyMaterial::from_bytes(key_bytes);
+
+    state.save_atomic(path, &key).is_ok()
+}
+
+/// Loads the state from an atomically saved file.
+///
+/// # Safety
+/// `path_ptr` must be a null-terminated UTF-8 string.
+/// `key_ptr` must point to 32 bytes of key material.
+#[no_mangle]
+pub unsafe extern "C" fn pqa_load_atomic(
+    path_ptr: *const i8,
+    key_ptr: *const u8,
+) -> *mut RatchetState {
+    let path_str = CStr::from_ptr(path_ptr).to_str().unwrap();
+    let path = Path::new(path_str);
+
+    let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
+    let key = SecretKeyMaterial::from_bytes(key_bytes);
+
+    match RatchetState::load_atomic(path, &key) {
+        Ok(state) => Box::into_raw(Box::new(state)),
+        Err(_) => std::ptr::null_mut(),
     }
 }
