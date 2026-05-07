@@ -11,6 +11,7 @@
 pub mod crypto;
 pub mod ffi;
 pub mod handshake;
+pub mod jni;
 pub mod ratchet;
 pub mod state;
 pub mod wasm;
