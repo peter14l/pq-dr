@@ -1,7 +1,7 @@
 use crate::ratchet::{Message, RatchetEngine};
 use crate::state::RatchetState;
-use jni::objects::{JClass, JObject};
-use jni::sys::{jbyteArray, jlong, jsize};
+use jni::objects::{JClass, JByteArray, JString};
+use jni::sys::{jbyteArray, jlong};
 use jni::JNIEnv;
 
 #[no_mangle]
@@ -15,17 +15,20 @@ pub extern "system" fn Java_com_oasis_app_PqAuraNative_decrypt(
 ) -> jbyteArray {
     let state = unsafe { &mut *(state_ptr as *mut RatchetState) };
     
-    let header_bytes = match env.convert_byte_array(header) {
+    let header_obj = unsafe { JByteArray::from_raw(header) };
+    let header_bytes = match env.convert_byte_array(&header_obj) {
         Ok(b) => b,
         Err(_) => return std::ptr::null_mut(),
     };
     
-    let payload_bytes = match env.convert_byte_array(payload) {
+    let payload_obj = unsafe { JByteArray::from_raw(payload) };
+    let payload_bytes = match env.convert_byte_array(&payload_obj) {
         Ok(b) => b,
         Err(_) => return std::ptr::null_mut(),
     };
     
-    let ad_bytes = match env.convert_byte_array(ad) {
+    let ad_obj = unsafe { JByteArray::from_raw(ad) };
+    let ad_bytes = match env.convert_byte_array(&ad_obj) {
         Ok(b) => b,
         Err(_) => return std::ptr::null_mut(),
     };
@@ -38,7 +41,7 @@ pub extern "system" fn Java_com_oasis_app_PqAuraNative_decrypt(
     match RatchetEngine::decrypt(state, &message, &ad_bytes) {
         Ok(plaintext) => {
             match env.byte_array_from_slice(&plaintext) {
-                Ok(arr) => arr,
+                Ok(arr) => arr.as_raw(),
                 Err(_) => std::ptr::null_mut(),
             }
         }
@@ -52,7 +55,8 @@ pub extern "system" fn Java_com_oasis_app_PqAuraNative_init_1state(
     _class: JClass,
     serialized_state: jbyteArray,
 ) -> jlong {
-    let bytes = match env.convert_byte_array(serialized_state) {
+    let obj = unsafe { JByteArray::from_raw(serialized_state) };
+    let bytes = match env.convert_byte_array(&obj) {
         Ok(b) => b,
         Err(_) => return 0,
     };
@@ -67,15 +71,17 @@ pub extern "system" fn Java_com_oasis_app_PqAuraNative_init_1state(
 pub extern "system" fn Java_com_oasis_app_PqAuraNative_load_1atomic(
     mut env: JNIEnv,
     _class: JClass,
-    path: jni::objects::JString,
+    path: jni::sys::jstring,
     key: jbyteArray,
 ) -> jlong {
-    let path_str: String = match env.get_string(&path) {
+    let path_obj = unsafe { JString::from_raw(path) };
+    let path_str: String = match env.get_string(&path_obj) {
         Ok(s) => s.into(),
         Err(_) => return 0,
     };
     
-    let key_bytes = match env.convert_byte_array(key) {
+    let key_obj = unsafe { JByteArray::from_raw(key) };
+    let key_bytes = match env.convert_byte_array(&key_obj) {
         Ok(b) => b,
         Err(_) => return 0,
     };
@@ -98,17 +104,19 @@ pub extern "system" fn Java_com_oasis_app_PqAuraNative_save_1atomic(
     mut env: JNIEnv,
     _class: JClass,
     state_ptr: jlong,
-    path: jni::objects::JString,
+    path: jni::sys::jstring,
     key: jbyteArray,
 ) -> jni::sys::jboolean {
     let state = unsafe { &*(state_ptr as *const RatchetState) };
     
-    let path_str: String = match env.get_string(&path) {
+    let path_obj = unsafe { JString::from_raw(path) };
+    let path_str: String = match env.get_string(&path_obj) {
         Ok(s) => s.into(),
         Err(_) => return jni::sys::JNI_FALSE,
     };
     
-    let key_bytes = match env.convert_byte_array(key) {
+    let key_obj = unsafe { JByteArray::from_raw(key) };
+    let key_bytes = match env.convert_byte_array(&key_obj) {
         Ok(b) => b,
         Err(_) => return jni::sys::JNI_FALSE,
     };
