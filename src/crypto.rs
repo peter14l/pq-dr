@@ -163,13 +163,14 @@ impl HybridSecretKey {
     /// Format: [32 bytes X25519] + [3168 bytes ML-KEM-1024]
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
         if bytes.len() != 32 + 3168 {
-            return Err(crate::AuraError::KeyLengthError("Invalid hybrid secret key length".into()));
+            return Err(crate::AuraError::KeyLengthError(
+                "Invalid hybrid secret key length".into(),
+            ));
         }
         let (x_bytes, ml_bytes) = bytes.split_at(32);
-        let x_sk = XStaticSecret::from(
-            <[u8; 32]>::try_from(x_bytes)
-                .map_err(|_| crate::AuraError::KeyLengthError("Invalid X25519 secret key length".into()))?
-        );
+        let x_sk = XStaticSecret::from(<[u8; 32]>::try_from(x_bytes).map_err(|_| {
+            crate::AuraError::KeyLengthError("Invalid X25519 secret key length".into())
+        })?);
         let ml_sk = DecapsulationKey::<MlKem1024Params>::from_bytes(
             ml_bytes
                 .try_into()
@@ -218,14 +219,16 @@ pub fn hybrid_decapsulate(
     ciphertext: &[u8],
 ) -> Result<SecretKeyMaterial, crate::AuraError> {
     if ciphertext.len() < 32 {
-        return Err(crate::AuraError::KeyLengthError("Invalid ciphertext length".into()));
+        return Err(crate::AuraError::KeyLengthError(
+            "Invalid ciphertext length".into(),
+        ));
     }
 
     let (x_public_bytes, ml_ciphertext_bytes) = ciphertext.split_at(32);
-    let ephemeral_x_public = XPublicKey::from(
-        <[u8; 32]>::try_from(x_public_bytes)
-            .map_err(|_| crate::AuraError::KeyLengthError("Invalid X25519 public key length".into()))?
-    );
+    let ephemeral_x_public =
+        XPublicKey::from(<[u8; 32]>::try_from(x_public_bytes).map_err(|_| {
+            crate::AuraError::KeyLengthError("Invalid X25519 public key length".into())
+        })?);
 
     let x_shared = sk.classic.diffie_hellman(&ephemeral_x_public);
 

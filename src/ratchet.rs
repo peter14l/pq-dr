@@ -35,7 +35,7 @@ pub struct RatchetEngine;
 
 impl RatchetEngine {
     /// Encrypts a message using the current ratchet state.
-    /// 
+    ///
     /// # Panics
     /// Panics if the sending DH step fails (should never happen in valid state).
     pub fn encrypt<R: RngCore + CryptoRng>(
@@ -230,8 +230,14 @@ impl RatchetEngine {
         Ok(())
     }
 
-    fn perform_sending_dh_step<R: RngCore + CryptoRng>(state: &mut RatchetState, rng: &mut R) -> Result<(), crate::AuraError> {
-        let remote_pk = state.remote_dh_pk.as_ref().ok_or_else(|| crate::AuraError::InvalidState("No remote public key".into()))?;
+    fn perform_sending_dh_step<R: RngCore + CryptoRng>(
+        state: &mut RatchetState,
+        rng: &mut R,
+    ) -> Result<(), crate::AuraError> {
+        let remote_pk = state
+            .remote_dh_pk
+            .as_ref()
+            .ok_or_else(|| crate::AuraError::InvalidState("No remote public key".into()))?;
         let (shared_secret, ct) = crypto::hybrid_encapsulate(remote_pk, rng);
         state.pending_kem_ciphertext = ct;
         let (new_root, new_send_chain) = crypto::kdf_root_step(&state.root_key, &shared_secret);
