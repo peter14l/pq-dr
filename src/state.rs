@@ -123,7 +123,8 @@ impl RatchetState {
         encryption_key: &SecretKeyMaterial,
         nonce: &[u8; 12],
     ) -> Result<Vec<u8>, crate::AuraError> {
-        let serialized = serde_json::to_vec(self).map_err(|e| crate::AuraError::SerializationError(e.to_string()))?;
+        let serialized =
+            serde_json::to_vec(self).map_err(|e| crate::AuraError::SerializationError(e.to_string()))?;
         Ok(crate::crypto::encrypt(
             encryption_key,
             nonce,
@@ -140,7 +141,8 @@ impl RatchetState {
     ) -> Result<Self, crate::AuraError> {
         let decrypted =
             crate::crypto::decrypt(encryption_key, nonce, b"PQ-Aura State Export", ciphertext)?;
-        serde_json::from_slice(&decrypted).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
+        serde_json::from_slice(&decrypted)
+            .map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 
     /// Atomically saves the encrypted state to a file.

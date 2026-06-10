@@ -8,22 +8,22 @@ use std::fmt;
 pub enum AuraError {
     /// Cryptographic operation failed
     CryptoError(String),
-    
+
     /// Serialization/deserialization failed
     SerializationError(String),
-    
+
     /// Key has invalid length
     KeyLengthError(String),
-    
+
     /// Invalid state for the requested operation
     InvalidState(String),
-    
+
     /// Network/IO error (for future use)
     NetworkError(String),
-    
+
     /// Authentication failed
     AuthenticationError(String),
-    
+
     /// Message too old or too far out of order
     MessageOrderError(String),
 }

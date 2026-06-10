@@ -22,7 +22,8 @@ impl PreKeyBundle {
 
     /// Deserializes a bundle from bytes.
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
-        serde_json::from_slice(bytes).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
+        serde_json::from_slice(bytes)
+            .map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 }
 
@@ -47,7 +48,8 @@ impl InitialMessage {
 
     /// Deserializes a message from bytes.
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
-        serde_json::from_slice(bytes).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
+        serde_json::from_slice(bytes)
+            .map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 }
 
@@ -169,7 +171,9 @@ impl HandshakeEngine {
         let mut ss_kem3_opt = None;
 
         if let Some(ct3) = &message.kem_ciphertext_one_time {
-            let otpk_sk = bob_otpk_sk.ok_or(crate::AuraError::InvalidState("One-time pre-key secret missing".into()))?;
+            let otpk_sk = bob_otpk_sk.ok_or(crate::AuraError::InvalidState(
+                "One-time pre-key secret missing".into(),
+            ))?;
             let x_dh4 = otpk_sk
                 .classic
                 .diffie_hellman(&message.ephemeral_pk.classic);

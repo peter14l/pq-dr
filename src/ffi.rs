@@ -111,7 +111,12 @@ pub unsafe extern "C" fn pqa_decrypt(
     ad_len: usize,
     out_len: *mut usize,
 ) -> *mut u8 {
-    if state_ptr.is_null() || header_ptr.is_null() || payload_ptr.is_null() || ad_ptr.is_null() || out_len.is_null() {
+    if state_ptr.is_null()
+        || header_ptr.is_null()
+        || payload_ptr.is_null()
+        || ad_ptr.is_null()
+        || out_len.is_null()
+    {
         return std::ptr::null_mut();
     }
     let state = &mut *state_ptr;
@@ -327,7 +332,10 @@ pub unsafe extern "C" fn pqa_init_alice(
     local_identity_sk_ptr: *const u8,
     local_identity_sk_len: usize,
 ) -> *mut FfiInitialMessage {
-    if remote_bundle_ptr.is_null() || local_identity_pk_ptr.is_null() || local_identity_sk_ptr.is_null() {
+    if remote_bundle_ptr.is_null()
+        || local_identity_pk_ptr.is_null()
+        || local_identity_sk_ptr.is_null()
+    {
         return std::ptr::null_mut();
     }
     let remote_bundle_bytes = std::slice::from_raw_parts(remote_bundle_ptr, remote_bundle_len);
@@ -429,7 +437,11 @@ pub unsafe extern "C" fn pqa_init_bob(
     local_ot_sk_len: usize,
     has_ot_sk: bool,
 ) -> *mut RatchetState {
-    if initial_msg_ptr.is_null() || local_identity_pk_ptr.is_null() || local_identity_sk_ptr.is_null() || local_signed_sk_ptr.is_null() {
+    if initial_msg_ptr.is_null()
+        || local_identity_pk_ptr.is_null()
+        || local_identity_sk_ptr.is_null()
+        || local_signed_sk_ptr.is_null()
+    {
         return std::ptr::null_mut();
     }
     let initial_msg_bytes = std::slice::from_raw_parts(initial_msg_ptr, initial_msg_len);
@@ -620,7 +632,7 @@ pub unsafe extern "C" fn pqa_save_atomic(
         Err(_) => return false,
     };
     let path = Path::new(path_str);
-    
+
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
     let key = SecretKeyMaterial::from_bytes(key_bytes);
 
@@ -645,7 +657,7 @@ pub unsafe extern "C" fn pqa_load_atomic(
         Err(_) => return std::ptr::null_mut(),
     };
     let path = Path::new(path_str);
-    
+
     let key_bytes = std::slice::from_raw_parts(key_ptr, 32);
     let key = SecretKeyMaterial::from_bytes(key_bytes);
 

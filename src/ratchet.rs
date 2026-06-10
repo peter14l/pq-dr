@@ -17,7 +17,8 @@ pub struct Header {
 
 impl Header {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
-        serde_json::from_slice(bytes).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
+        serde_json::from_slice(bytes)
+            .map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 }
 
@@ -134,7 +135,9 @@ impl RatchetEngine {
         let chain = state
             .recv_chain
             .as_mut()
-            .ok_or(crate::AuraError::InvalidState("Receiving chain not initialized".into()))?;
+            .ok_or(crate::AuraError::InvalidState(
+                "Receiving chain not initialized".into(),
+            ))?;
         let (new_chain_key, msg_key) = crypto::kdf_chain_step(&chain.key);
         chain.key = new_chain_key;
         let n = chain.index;
@@ -186,7 +189,9 @@ impl RatchetEngine {
             }
         }
 
-        Err(crate::AuraError::InvalidState("Header decryption failed: no matching header key".into()))
+        Err(crate::AuraError::InvalidState(
+            "Header decryption failed: no matching header key".into(),
+        ))
     }
 
     fn skip_msg_keys(state: &mut RatchetState, until: u32) -> Result<(), crate::AuraError> {
@@ -197,7 +202,10 @@ impl RatchetEngine {
                 return Err(crate::AuraError::InvalidState("No receiving chain".into()));
             }
         }
-        let remote_pk = state.remote_dh_pk.as_ref().ok_or(crate::AuraError::InvalidState("No remote public key".into()))?;
+        let remote_pk = state
+            .remote_dh_pk
+            .as_ref()
+            .ok_or(crate::AuraError::InvalidState("No remote public key".into()))?;
         let chain = state.recv_chain.as_mut().unwrap();
 
         if chain.index > until {
@@ -206,7 +214,9 @@ impl RatchetEngine {
 
         let num_to_skip = until - chain.index;
         if num_to_skip > MAX_SKIP {
-            return Err(crate::AuraError::InvalidState("Too many messages to skip (DoS protection)".into()));
+            return Err(crate::AuraError::InvalidState(
+                "Too many messages to skip (DoS protection)".into(),
+            ));
         }
 
         while chain.index < until {
@@ -276,7 +286,10 @@ impl RatchetEngine {
         state.remote_dh_pk = Some(header.dh_pk.clone());
 
         let shared_secret = crypto::hybrid_decapsulate(
-            state.dh_sk.as_ref().ok_or(crate::AuraError::InvalidState("No local secret key".into()))?,
+            state
+                .dh_sk
+                .as_ref()
+                .ok_or(crate::AuraError::InvalidState("No local secret key".into()))?,
             &header.kem_ciphertext,
         )?;
 
