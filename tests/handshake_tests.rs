@@ -170,7 +170,10 @@ fn test_handshake_fails_with_wrong_keys() {
 
     // Eve should NOT be able to decrypt Alice's message to Bob
     let result = RatchetEngine::decrypt(&mut eve_state, &msg, ad);
-    assert!(result.is_err(), "Eve should not be able to decrypt Alice's message");
+    assert!(
+        result.is_err(),
+        "Eve should not be able to decrypt Alice's message"
+    );
 }
 
 #[test]

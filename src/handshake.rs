@@ -206,11 +206,8 @@ impl HandshakeEngine {
         let identity_sk_clone = HybridSecretKey::from_bytes(&identity_sk_bytes)
             .map_err(|e| crate::AuraError::CryptoError(e.to_string()))?;
 
-        let mut state = RatchetState::new_bob(
-            root_key.clone(),
-            bob_identity_pk.clone(),
-            identity_sk_clone,
-        );
+        let mut state =
+            RatchetState::new_bob(root_key.clone(), bob_identity_pk.clone(), identity_sk_clone);
         state.remote_dh_pk = Some(message.alice_identity_pk.clone());
 
         Ok((state, root_key))
