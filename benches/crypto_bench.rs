@@ -83,15 +83,15 @@ fn bench_combine_secrets(c: &mut Criterion) {
 
 fn bench_constant_time_eq(c: &mut Criterion) {
     let a = [0x42u8; 32];
-    let b = [0x42u8; 32];
+    let b_val = [0x42u8; 32];
     let c_val = [0x99u8; 32];
 
-    c.bench_function("constant_time_eq_equal", |b| {
-        b.iter(|| constant_time_eq(black_box(&a), black_box(&b)))
+    c.bench_function("constant_time_eq_equal", |bench| {
+        bench.iter(|| constant_time_eq(black_box(&a), black_box(&b_val)))
     });
 
-    c.bench_function("constant_time_eq_unequal", |b| {
-        b.iter(|| constant_time_eq(black_box(&a), black_box(&c_val)))
+    c.bench_function("constant_time_eq_unequal", |bench| {
+        bench.iter(|| constant_time_eq(black_box(&a), black_box(&c_val)))
     });
 }
 

@@ -114,7 +114,7 @@ fn main() {
         .unwrap();
     println!("   Exported state: {} bytes", exported.len());
 
-    let imported = RatchetState::import_state(&storage_key, &storage_nonce, &exported).unwrap();
+    let mut imported = RatchetState::import_state(&storage_key, &storage_nonce, &exported).unwrap();
     println!("   Imported state successfully");
 
     // Continue with imported state

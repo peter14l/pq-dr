@@ -42,7 +42,7 @@ impl AsRef<[u8]> for SecretKeyMaterial {
 }
 
 /// Hybrid Public Key containing both X25519 and ML-KEM-1024 components.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct HybridPublicKey {
     pub classic: XPublicKey,
     #[serde(with = "serde_quantum_pubkey")]

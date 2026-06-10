@@ -1,5 +1,6 @@
 use pq_aura::crypto::*;
 use pq_aura::handshake::*;
+use pq_aura::RatchetEngine;
 use rand::thread_rng;
 
 #[test]

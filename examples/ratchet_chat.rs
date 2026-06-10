@@ -101,9 +101,9 @@ fn main() {
     println!("   Bob exported state: {} bytes", bob_exported.len());
 
     // Import and continue
-    let alice_imported =
+    let mut alice_imported =
         RatchetState::import_state(&storage_key, &storage_nonce, &alice_exported).unwrap();
-    let bob_imported =
+    let mut bob_imported =
         RatchetState::import_state(&storage_key, &storage_nonce, &bob_exported).unwrap();
 
     // Continue conversation after import
