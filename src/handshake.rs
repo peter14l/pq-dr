@@ -21,8 +21,8 @@ impl PreKeyBundle {
     }
 
     /// Deserializes a bundle from bytes.
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
-        serde_json::from_slice(bytes).map_err(|_| "Failed to deserialize PreKeyBundle")
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
+        serde_json::from_slice(bytes).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 }
 
@@ -46,8 +46,8 @@ impl InitialMessage {
     }
 
     /// Deserializes a message from bytes.
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
-        serde_json::from_slice(bytes).map_err(|_| "Failed to deserialize InitialMessage")
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
+        serde_json::from_slice(bytes).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 }
 
@@ -143,7 +143,7 @@ impl HandshakeEngine {
         bob_identity_sk: &HybridSecretKey,
         bob_signed_sk: &HybridSecretKey,
         bob_otpk_sk: Option<&HybridSecretKey>,
-    ) -> Result<(RatchetState, SecretKeyMaterial), &'static str> {
+    ) -> Result<(RatchetState, SecretKeyMaterial), crate::AuraError> {
         // 1. Perform Hybrid DH exchanges (X25519 + ML-KEM)
 
         // DH1 = Alice Identity <-> Bob Signed Pre-Key
@@ -169,7 +169,7 @@ impl HandshakeEngine {
         let mut ss_kem3_opt = None;
 
         if let Some(ct3) = &message.kem_ciphertext_one_time {
-            let otpk_sk = bob_otpk_sk.ok_or("One-time pre-key secret missing")?;
+            let otpk_sk = bob_otpk_sk.ok_or(crate::AuraError::InvalidState("One-time pre-key secret missing".into()))?;
             let x_dh4 = otpk_sk
                 .classic
                 .diffie_hellman(&message.ephemeral_pk.classic);

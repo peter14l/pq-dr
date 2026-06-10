@@ -21,7 +21,6 @@ allow = [
     "BSL-1.0",
     "Unicode-3.0",
 ]
-confidence = 0.8
 
 [bans]
 multiple-versions = "warn"
@@ -29,7 +28,6 @@ wildcards = "allow"
 highlight = "all"
 allow = []
 deny = [
-    # Dangerous crates that should never be used
     "unsafe-any",
     "unsafe-crypto",
 ]

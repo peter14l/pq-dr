@@ -16,8 +16,8 @@ pub struct Header {
 }
 
 impl Header {
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
-        serde_json::from_slice(bytes).map_err(|_| "Invalid header format")
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
+        serde_json::from_slice(bytes).map_err(|e| crate::AuraError::SerializationError(e.to_string()))
     }
 }
 

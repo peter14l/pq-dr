@@ -131,17 +131,21 @@ impl HybridPublicKey {
 
     /// Deserializes a hybrid public key from bytes.
     /// Format: [32 bytes X25519] + [1568 bytes ML-KEM-1024]
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, crate::AuraError> {
         if bytes.len() != 32 + 1568 {
-            return Err("Invalid hybrid public key length");
+            return Err(crate::AuraError::KeyLengthError(
+                "Invalid hybrid public key length".into(),
+            ));
         }
         let (x_bytes, ml_bytes) = bytes.split_at(32);
-        let x_pk = XPublicKey::from(<[u8; 32]>::try_from(x_bytes).unwrap());
-        let ml_pk = EncapsulationKey::<MlKem1024Params>::from_bytes(
-            ml_bytes
-                .try_into()
-                .map_err(|_| "Invalid ML-KEM public key")?,
-        );
+        let x_arr: [u8; 32] = x_bytes.try_into().map_err(|_| {
+            crate::AuraError::KeyLengthError("Invalid X25519 public key bytes".into())
+        })?;
+        let x_pk = XPublicKey::from(x_arr);
+        let ml_arr: [u8; 1568] = ml_bytes.try_into().map_err(|_| {
+            crate::AuraError::KeyLengthError("Invalid ML-KEM public key".into())
+        })?;
+        let ml_pk = EncapsulationKey::<MlKem1024Params>::from_bytes(ml_arr);
         Ok(HybridPublicKey {
             classic: x_pk,
             quantum: ml_pk,
@@ -263,7 +267,7 @@ pub fn decrypt(
     nonce: &[u8; 12],
     ad: &[u8],
     ciphertext: &[u8],
-) -> Result<Vec<u8>, &'static str> {
+) -> Result<Vec<u8>, crate::AuraError> {
     let cipher = Aes256GcmSiv::new((&key.0).into());
     let nonce = Nonce::from_slice(nonce);
     cipher
@@ -274,7 +278,7 @@ pub fn decrypt(
                 aad: ad,
             },
         )
-        .map_err(|_| "Decryption failed")
+        .map_err(|_| crate::AuraError::CryptoError("Decryption failed".into()))
 }
 
 /// Constant-time comparison for secrets.
