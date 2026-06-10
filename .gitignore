@@ -18,5 +18,5 @@ desktop.ini
 # Project specific logs
 *.log
 
-# Ensure Cargo.lock is kept for CI consistency as per PRD
-# !Cargo.lock
+# Ensure Cargo.lock is not tracked (library crate)
+Cargo.lock
