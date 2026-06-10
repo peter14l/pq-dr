@@ -58,6 +58,7 @@
 //! GNU General Public License v3.0
 
 pub mod crypto;
+pub mod error;
 pub mod handshake;
 pub mod ratchet;
 pub mod state;
