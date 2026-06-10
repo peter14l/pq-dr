@@ -205,7 +205,9 @@ impl RatchetEngine {
         let remote_pk = state
             .remote_dh_pk
             .as_ref()
-            .ok_or(crate::AuraError::InvalidState("No remote public key".into()))?;
+            .ok_or(crate::AuraError::InvalidState(
+                "No remote public key".into(),
+            ))?;
         let chain = state.recv_chain.as_mut().unwrap();
 
         if chain.index > until {

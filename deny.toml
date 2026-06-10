@@ -2,10 +2,6 @@
 # Run: cargo deny check
 
 [advisories]
-vulnerability = "deny"
-unmaintained = "deny"
-yanked = "warn"
-notice = "warn"
 ignore = []
 
 [licenses]

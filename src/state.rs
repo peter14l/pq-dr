@@ -123,8 +123,8 @@ impl RatchetState {
         encryption_key: &SecretKeyMaterial,
         nonce: &[u8; 12],
     ) -> Result<Vec<u8>, crate::AuraError> {
-        let serialized =
-            serde_json::to_vec(self).map_err(|e| crate::AuraError::SerializationError(e.to_string()))?;
+        let serialized = serde_json::to_vec(self)
+            .map_err(|e| crate::AuraError::SerializationError(e.to_string()))?;
         Ok(crate::crypto::encrypt(
             encryption_key,
             nonce,

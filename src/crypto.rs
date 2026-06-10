@@ -138,14 +138,14 @@ impl HybridPublicKey {
             ));
         }
         let (x_bytes, ml_bytes) = bytes.split_at(32);
-        let x_arr: [u8; 32] = x_bytes
-            .try_into()
-            .map_err(|_| crate::AuraError::KeyLengthError("Invalid X25519 public key bytes".into()))?;
+        let x_arr: [u8; 32] = x_bytes.try_into().map_err(|_| {
+            crate::AuraError::KeyLengthError("Invalid X25519 public key bytes".into())
+        })?;
         let x_pk = XPublicKey::from(x_arr);
         let ml_arr: [u8; 1568] = ml_bytes
             .try_into()
             .map_err(|_| crate::AuraError::KeyLengthError("Invalid ML-KEM public key".into()))?;
-        let ml_pk = EncapsulationKey::<MlKem1024Params>::from_bytes(&ml_arr);
+        let ml_pk = EncapsulationKey::<MlKem1024Params>::from_bytes((&ml_arr).into());
         Ok(HybridPublicKey {
             classic: x_pk,
             quantum: ml_pk,
