@@ -141,7 +141,7 @@ impl HandshakeEngine {
     /// Bob responds to Alice's InitialMessage using his local secret keys.
     pub fn respond_bob(
         message: &InitialMessage,
-        _bob_identity_pk: &HybridPublicKey,
+        bob_identity_pk: &HybridPublicKey,
         bob_identity_sk: &HybridSecretKey,
         bob_signed_sk: &HybridSecretKey,
         bob_otpk_sk: Option<&HybridSecretKey>,
