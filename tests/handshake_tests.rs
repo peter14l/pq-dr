@@ -126,26 +126,51 @@ fn test_handshake_fails_with_wrong_keys() {
         one_time_pre_key: Some(bob_ot_pk),
     };
 
-    // Alice initiates
+    // Alice initiates with Bob's bundle
     let (alice_id_pk, alice_id_sk) = generate_hybrid_keypair(&mut rng);
-    let (mut _alice_state, initial_msg, _alice_root_key) =
+    let (mut alice_state, initial_msg, _alice_root_key) =
         HandshakeEngine::initiate_alice(&bundle, &alice_id_pk, &alice_id_sk, &mut rng);
 
-    // Eve tries to respond with wrong keys
+    // Bob responds with his correct keys
+    let (mut bob_state, _bob_root_key) = HandshakeEngine::respond_bob(
+        &initial_msg,
+        &bob_id_pk,
+        &bob_id_sk,
+        &bob_signed_sk,
+        Some(&bob_ot_sk),
+    )
+    .unwrap();
+
+    // Alice encrypts a message for Bob
+    let ad = b"test";
+    let msg = RatchetEngine::encrypt(&mut alice_state, b"Secret!", ad, &mut rng);
+
+    // Bob should be able to decrypt it
+    let dec = RatchetEngine::decrypt(&mut bob_state, &msg, ad).unwrap();
+    assert_eq!(dec, b"Secret!");
+
+    // Eve tries to respond with wrong keys — ML-KEM decapsulation with wrong keys
+    // produces a random shared secret (doesn't error), so the handshake "succeeds"
+    // but Eve gets a different root key.
     let (eve_id_pk, eve_id_sk) = generate_hybrid_keypair(&mut rng);
     let (eve_signed_pk, eve_signed_sk) = generate_hybrid_keypair(&mut rng);
     let (eve_ot_pk, eve_ot_sk) = generate_hybrid_keypair(&mut rng);
 
-    let result = HandshakeEngine::respond_bob(
+    let (mut eve_state, eve_root_key) = HandshakeEngine::respond_bob(
         &initial_msg,
         &eve_id_pk,
         &eve_id_sk,
         &eve_signed_sk,
         Some(&eve_ot_sk),
-    );
+    )
+    .unwrap();
 
-    // Should fail because Eve doesn't have Bob's keys
-    assert!(result.is_err());
+    // Eve's root key should differ from Alice's (different shared secrets)
+    assert_ne!(_alice_root_key.as_ref(), eve_root_key.as_ref());
+
+    // Eve should NOT be able to decrypt Alice's message to Bob
+    let result = RatchetEngine::decrypt(&mut eve_state, &msg, ad);
+    assert!(result.is_err(), "Eve should not be able to decrypt Alice's message");
 }
 
 #[test]
