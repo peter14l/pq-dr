@@ -1,3 +1,4 @@
+use ml_kem::EncodedSizeUser;
 use pq_aura::crypto::*;
 use proptest::prelude::*;
 use rand::thread_rng;

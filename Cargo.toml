@@ -6,7 +6,7 @@ authors = ["Shreyas Sengupta"]
 description = "A Hybrid Post-Quantum Double Ratchet library"
 repository = "https://github.com/peter14l/pq-dr"
 homepage = "https://github.com/peter14l/pq-dr"
-license = "GPL-3.0"
+license = "GPL-3.0-only"
 keywords = ["cryptography", "post-quantum", "double-ratchet", "ml-kem", "x25519"]
 categories = ["cryptography", "no-std"]
 
