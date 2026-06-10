@@ -1,0 +1,8 @@
+# cargo-audit configuration for PQ-Aura
+# Run: cargo audit
+
+[advisories]
+ignore = []
+database-path = "~/.cargo/advisory-db"
+database-url = "https://github.com/rustsec/advisory-db"
+stale = true

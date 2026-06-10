@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Shreyas Sengupta"]
 description = "A Hybrid Post-Quantum Double Ratchet library"
+repository = "https://github.com/peter14l/pq-dr"
+homepage = "https://github.com/peter14l/pq-dr"
+license = "GPL-3.0"
+keywords = ["cryptography", "post-quantum", "double-ratchet", "ml-kem", "x25519"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 # Quantum-resistant KEM (FIPS 203)
@@ -41,8 +46,17 @@ jni = "0.21"
 [dev-dependencies]
 proptest = "1.4"
 tokio = { version = "1.0", features = ["full"] }
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [lib]
 name = "pq_aura"
 path = "src/lib.rs"
 crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bench]]
+name = "crypto_bench"
+harness = false
+
+[[bench]]
+name = "ratchet_bench"
+harness = false

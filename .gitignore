@@ -2,6 +2,11 @@
 # Will be created by the "Cloud Compiler" (GitHub Actions)
 /target
 
+# Fuzz artifacts
+/fuzz/artifacts
+/fuzz/corpus
+/fuzz/target
+
 # Backup files from editors
 **/*.rs.bk
 

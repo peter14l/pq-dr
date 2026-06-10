@@ -1,0 +1,41 @@
+name: Fuzz
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  fuzz:
+    name: Fuzz Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - decrypt_fuzz
+          - decapsulate_fuzz
+          - header_fuzz
+          - serialize_fuzz
+          - handshake_fuzz
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz
+      
+      - name: Build fuzz targets
+        run: cargo fuzz build
+      
+      - name: Run fuzz target for 5 minutes
+        run: cargo fuzz run ${{ matrix.target }} -- -max_total_time=300
+        continue-on-error: true
+      
+      - name: Check for crashes
+        if: failure()
+        run: |
+          echo "Fuzz target ${{ matrix.target }} crashed!"
+          ls -la fuzz/artifacts/${{ matrix.target }}/
