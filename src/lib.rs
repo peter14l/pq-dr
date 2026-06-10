@@ -64,10 +64,10 @@ pub mod state;
 
 // Re-exports for convenience
 pub use crypto::{
-    generate_hybrid_keypair, hybrid_decapsulate, hybrid_encapsulate, HybridPublicKey,
-    HybridSecretKey, SecretKeyMaterial,
+    generate_hybrid_keypair, hybrid_decapsulate, hybrid_encapsulate, 
+    HybridPublicKey, HybridSecretKey, SecretKeyMaterial,
 };
-pub use error::AuraError;
+pub use crate::error::AuraError;
 pub use handshake::{HandshakeEngine, InitialMessage, PreKeyBundle};
 pub use ratchet::{Header, Message, RatchetEngine};
 pub use state::{ChainState, HeaderChain, RatchetState};
