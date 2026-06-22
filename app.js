@@ -1,21 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
+    injectPaymentModal();
     initHeroSimulator();
     initInteractiveSimulator();
     initCodeTabs();
     initCheckout();
 });
 
+// ============================================================
+// Payment Success Modal
+// ============================================================
+function injectPaymentModal() {
+    const modal = document.createElement('div');
+    modal.id = 'payment-success-modal';
+    modal.innerHTML = `
+        <div class="psm-backdrop" id="psm-backdrop"></div>
+        <div class="psm-card" id="psm-card" role="dialog" aria-modal="true" aria-labelledby="psm-title">
+            <div class="psm-icon">✅</div>
+            <h2 class="psm-title" id="psm-title">Payment Successful!</h2>
+            <p class="psm-subtitle">Thank you for purchasing the PQ-Aura Commercial SDK License.</p>
+            <div class="psm-detail-box">
+                <div class="psm-row">
+                    <span class="psm-label">Product</span>
+                    <span class="psm-value">Commercial SDK License</span>
+                </div>
+                <div class="psm-row">
+                    <span class="psm-label">Amount</span>
+                    <span class="psm-value">₹16,500 / month</span>
+                </div>
+                <div class="psm-row">
+                    <span class="psm-label">Payment ID</span>
+                    <span class="psm-value psm-payment-id" id="psm-payment-id">—</span>
+                </div>
+            </div>
+            <div class="psm-next">
+                <p class="psm-next-title">What happens next?</p>
+                <ol class="psm-steps">
+                    <li>Your license agreement will be emailed within <strong>24 hours</strong>.</li>
+                    <li>Reply to that email to confirm your company name &amp; use case.</li>
+                    <li>You'll receive your signed Commercial License PDF and SDK access token.</li>
+                </ol>
+            </div>
+            <p class="psm-support">Questions? Email <a href="mailto:support@pqaura.dev">support@pqaura.dev</a></p>
+            <button class="btn btn-primary psm-close-btn" id="psm-close-btn">Close</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('psm-close-btn').addEventListener('click', closePaymentModal);
+    document.getElementById('psm-backdrop').addEventListener('click', closePaymentModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePaymentModal(); });
+}
+
+function openPaymentModal(paymentId) {
+    document.getElementById('psm-payment-id').textContent = paymentId || '—';
+    const modal = document.getElementById('payment-success-modal');
+    modal.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    // Animate card in
+    setTimeout(() => {
+        document.getElementById('psm-card').classList.add('animate-in');
+    }, 10);
+}
+
+function closePaymentModal() {
+    const modal = document.getElementById('payment-success-modal');
+    const card = document.getElementById('psm-card');
+    card.classList.remove('animate-in');
+    setTimeout(() => {
+        modal.classList.remove('visible');
+        document.body.style.overflow = '';
+    }, 300);
+}
+
 async function initCheckout() {
     try {
         const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8080'
-            : 'https://peter14l-pq-aura-server.hf.space'; // Fallback to Hugging Face Space in production
+            : 'https://peter14l-pq-aura-server.hf.space';
 
         const response = await fetch(`${baseUrl}/config`);
         if (!response.ok) throw new Error('Failed to fetch config');
         const config = await response.json();
 
-        // 1. Initialize Razorpay
+        // Initialize Razorpay
         loadScript('https://checkout.razorpay.com/v1/checkout.js', () => {
             const razorpayBtn = document.getElementById('btn-pricing-commercial');
             if (razorpayBtn) {
@@ -23,18 +90,21 @@ async function initCheckout() {
                     e.preventDefault();
                     const options = {
                         "key": config.razorpay_key_id,
-                        "amount": "1650000", // 16500 INR in paise (~$199 USD)
+                        "amount": "1650000", // 16500 INR in paise
                         "currency": "INR",
                         "name": "PQ-Aura",
-                        "description": "Commercial SDK License",
+                        "description": "Commercial SDK License — Monthly",
                         "image": "assets/logo.jpg",
                         "handler": function (res) {
-                            alert("Payment Successful! Payment ID: " + res.razorpay_payment_id);
+                            openPaymentModal(res.razorpay_payment_id);
                         },
                         "prefill": {
                             "name": "",
                             "email": "",
                             "contact": ""
+                        },
+                        "notes": {
+                            "product": "Commercial SDK License"
                         },
                         "theme": {
                             "color": "#6366f1"
