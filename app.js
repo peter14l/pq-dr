@@ -9,7 +9,7 @@ async function initCheckout() {
     try {
         const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:8080'
-            : ''; // Fallback for relative paths in production deployment
+            : 'https://peter14l-pq-aura-server.hf.space'; // Fallback to Hugging Face Space in production
 
         const response = await fetch(`${baseUrl}/config`);
         if (!response.ok) throw new Error('Failed to fetch config');
