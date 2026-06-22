@@ -46,31 +46,6 @@ async function initCheckout() {
             }
         });
 
-        // 2. Initialize PayPal
-        loadScript(`https://www.paypal.com/sdk/js?client-id=${config.paypal_client_id}&currency=USD`, () => {
-            if (window.paypal) {
-                window.paypal.Buttons({
-                    createOrder: function(data, actions) {
-                        return actions.order.create({
-                            purchase_units: [{
-                                amount: {
-                                    value: '199.00'
-                                }
-                            }]
-                        });
-                    },
-                    onApprove: function(data, actions) {
-                        return actions.order.capture().then(function(details) {
-                            alert('Transaction completed by ' + details.payer.name.given_name + '!');
-                        });
-                    },
-                    onError: function(err) {
-                        console.error('PayPal Error:', err);
-                    }
-                }).render('#paypal-button-container');
-            }
-        });
-
     } catch (err) {
         console.error('Failed to initialize checkout:', err);
     }
