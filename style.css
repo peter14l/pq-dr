@@ -181,6 +181,13 @@ p {
   letter-spacing: -0.01em;
 }
 
+.logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .logo-icon {
   font-size: 1.5rem;
 }
