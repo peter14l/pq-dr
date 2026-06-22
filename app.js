@@ -2,7 +2,87 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroSimulator();
     initInteractiveSimulator();
     initCodeTabs();
+    initCheckout();
 });
+
+async function initCheckout() {
+    try {
+        const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8080'
+            : ''; // Fallback for relative paths in production deployment
+
+        const response = await fetch(`${baseUrl}/config`);
+        if (!response.ok) throw new Error('Failed to fetch config');
+        const config = await response.json();
+
+        // 1. Initialize Razorpay
+        loadScript('https://checkout.razorpay.com/v1/checkout.js', () => {
+            const razorpayBtn = document.getElementById('btn-pricing-commercial');
+            if (razorpayBtn) {
+                razorpayBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const options = {
+                        "key": config.razorpay_key_id,
+                        "amount": "1650000", // 16500 INR in paise (~$199 USD)
+                        "currency": "INR",
+                        "name": "PQ-Aura",
+                        "description": "Commercial SDK License",
+                        "image": "assets/logo.jpg",
+                        "handler": function (res) {
+                            alert("Payment Successful! Payment ID: " + res.razorpay_payment_id);
+                        },
+                        "prefill": {
+                            "name": "",
+                            "email": "",
+                            "contact": ""
+                        },
+                        "theme": {
+                            "color": "#6366f1"
+                        }
+                    };
+                    const rzp = new window.Razorpay(options);
+                    rzp.open();
+                });
+            }
+        });
+
+        // 2. Initialize PayPal
+        loadScript(`https://www.paypal.com/sdk/js?client-id=${config.paypal_client_id}&currency=USD`, () => {
+            if (window.paypal) {
+                window.paypal.Buttons({
+                    createOrder: function(data, actions) {
+                        return actions.order.create({
+                            purchase_units: [{
+                                amount: {
+                                    value: '199.00'
+                                }
+                            }]
+                        });
+                    },
+                    onApprove: function(data, actions) {
+                        return actions.order.capture().then(function(details) {
+                            alert('Transaction completed by ' + details.payer.name.given_name + '!');
+                        });
+                    },
+                    onError: function(err) {
+                        console.error('PayPal Error:', err);
+                    }
+                }).render('#paypal-button-container');
+            }
+        });
+
+    } catch (err) {
+        console.error('Failed to initialize checkout:', err);
+    }
+}
+
+function loadScript(src, callback) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = callback;
+    script.onerror = () => console.error('Failed to load script: ' + src);
+    document.head.appendChild(script);
+}
 
 // ==========================================================================
 // 1. Hero Handshake Simulator
