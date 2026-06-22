@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PQ-Aura | Hybrid Post-Quantum End-to-End Encryption SDK</title>
+    <meta name="description" content="Integrate hybrid post-quantum end-to-end encryption into your mobile, desktop, and web apps in 15 minutes. Pure Rust, Flutter FFI, and WebAssembly SDKs.">
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Styling -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo" id="nav-logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">PQ-AURA</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#features" class="nav-link" id="link-features">Technology</a>
+                <a href="#demo" class="nav-link" id="link-demo">Interactive Demo</a>
+                <a href="#code" class="nav-link" id="link-code">Documentation</a>
+                <a href="#pricing" class="nav-link" id="link-pricing">Pricing</a>
+            </nav>
+            <div class="nav-cta">
+                <a href="#code" class="btn btn-secondary btn-sm" id="btn-nav-docs">View SDK</a>
+                <a href="https://calendly.com" target="_blank" class="btn btn-primary btn-sm" id="btn-nav-consult">Book Audit</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="badge" id="hero-badge">NIST FIPS 203 COMPLIANT</div>
+                <h1 class="hero-title" id="hero-title">
+                    Quantum-Resistant E2EE,<br>
+                    <span class="gradient-text">Solved in 15 Minutes.</span>
+                </h1>
+                <p class="hero-subtitle" id="hero-subtitle">
+                    Drop hybrid post-quantum end-to-end encryption into your mobile, desktop, and web apps. Secure your users' communication against future quantum decryption threats today.
+                </p>
+                <div class="hero-actions">
+                    <a href="#code" class="btn btn-primary btn-lg" id="btn-hero-get-started">Get Free SDK</a>
+                    <a href="#demo" class="btn btn-secondary btn-lg" id="btn-hero-demo">Try Live Simulator</a>
+                </div>
+            </div>
+            
+            <!-- Interactive Handshake Visualizer -->
+            <div class="hero-visual">
+                <div class="visual-card" id="visual-card">
+                    <div class="card-header">
+                        <div class="dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <span class="header-title">Live Handshake Simulator</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="console-output" id="console-output">
+                            <div class="console-line text-muted">// Click "Run Handshake Simulator" below to begin</div>
+                            <div class="console-line text-info">PQ-Aura Engine: Initialized. Ready for session key derivation.</div>
+                        </div>
+                        <button class="btn btn-primary btn-block" id="btn-run-simulation">Run Handshake Simulator</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Threat Section -->
+    <section class="threat-section">
+        <div class="threat-container">
+            <div class="section-header">
+                <div class="badge badge-warning">THE THREAT</div>
+                <h2 class="section-title">Harvest Now, Decrypt Later (SNDL)</h2>
+                <p class="section-desc">
+                    Cybercriminals and nation-states are intercepting and storing encrypted data today. The moment cryptographically relevant quantum computers emerge, they will decrypt your archives. Your traditional locks are already obsolete.
+                </p>
+            </div>
+            
+            <div class="threat-grid">
+                <div class="threat-card" id="threat-capture">
+                    <div class="threat-icon">📥</div>
+                    <h3>1. Intercept & Store</h3>
+                    <p>Adversaries capture your corporate communication logs, medical databases, and file shares over the network today.</p>
+                </div>
+                <div class="threat-card" id="threat-wait">
+                    <div class="threat-icon">⌛</div>
+                    <h3>2. Wait for Decryption</h3>
+                    <p>Data sits in massive storage centers. Traditional public key algorithms (RSA, ECC, X25519) wait to be broken.</p>
+                </div>
+                <div class="threat-card highlight-card" id="threat-defense">
+                    <div class="threat-icon">🛡️</div>
+                    <h3>3. PQ-Aura Defense</h3>
+                    <p>By combining ML-KEM-1024 with X25519, PQ-Aura secures data from message zero, providing mathematical immunity to quantum computers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Technology / Features -->
+    <section class="features-section" id="features">
+        <div class="features-container">
+            <div class="section-header">
+                <div class="badge">CRYPTO STACK</div>
+                <h2 class="section-title">Defense In Depth Architecture</h2>
+                <p class="section-desc">
+                    We combine proven classical cryptography with next-generation post-quantum standards. If one algorithm fails, the other holds the line.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" id="feat-kem">
+                    <div class="feature-header">
+                        <span class="feature-icon">🌀</span>
+                        <h3>ML-KEM-1024</h3>
+                    </div>
+                    <p>FIPS 203 standardized post-quantum Key Encapsulation Mechanism. Represents the highest tier of quantum-resistant security.</p>
+                </div>
+
+                <div class="feature-card" id="feat-dh">
+                    <div class="feature-header">
+                        <span class="feature-icon">🔑</span>
+                        <h3>X25519 Fallback</h3>
+                    </div>
+                    <p>Classical Diffie-Hellman backup. Ensures absolute security in the highly unlikely event of a mathematical exploit in PQC.</p>
+                </div>
+
+                <div class="feature-card" id="feat-cipher">
+                    <div class="feature-header">
+                        <span class="feature-icon">🔒</span>
+                        <h3>AES-256-GCM-SIV</h3>
+                    </div>
+                    <p>Symmetric cipher resistant to nonce-misuse. Prevents accidental leakage even if developers reuse nonces during mass data transmissions.</p>
+                </div>
+
+                <div class="feature-card" id="feat-zeroize">
+                    <div class="feature-header">
+                        <span class="feature-icon">🧼</span>
+                        <h3>Zeroize Memory Wiping</h3>
+                    </div>
+                    <p>Automatic memory wiping of cryptographic private keys and symmetric key materials as soon as they are dropped, preventing RAM reading attacks.</p>
+                </div>
+
+                <div class="feature-card" id="feat-header">
+                    <div class="feature-header">
+                        <span class="feature-icon">🕶️</span>
+                        <h3>Header Encryption</h3>
+                    </div>
+                    <p>Unlike standard Signal protocol implementations, PQ-Aura encrypts message headers, completely hiding the ratchet state and packet metadata from intermediary servers.</p>
+                </div>
+
+                <div class="feature-card" id="feat-atomic">
+                    <div class="feature-header">
+                        <span class="feature-icon">💾</span>
+                        <h3>Atomic Persistence</h3>
+                    </div>
+                    <p>Secure session serialization and deserialization with "Shadow Saves" prevents file corruption and database leaks on persistent disks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo / Interactive playroom -->
+    <section class="demo-section" id="demo">
+        <div class="demo-container">
+            <div class="section-header">
+                <div class="badge">INTERACTIVE SIMULATION</div>
+                <h2 class="section-title">See the Double Ratchet in Action</h2>
+                <p class="section-desc">
+                    Toggle through the steps of a hybrid cryptographic handshake and witness how keys are derived, ratcheted, and rotated.
+                </p>
+            </div>
+
+            <div class="simulator-layout">
+                <div class="simulator-controls">
+                    <button class="sim-step-btn active" data-step="1" id="sim-btn-step1">
+                        <span class="step-num">1</span>
+                        <span class="step-lbl">Generate Identity</span>
+                    </button>
+                    <button class="sim-step-btn" data-step="2" id="sim-btn-step2">
+                        <span class="step-num">2</span>
+                        <span class="step-lbl">Bundle Exchange</span>
+                    </button>
+                    <button class="sim-step-btn" data-step="3" id="sim-btn-step3">
+                        <span class="step-num">3</span>
+                        <span class="step-lbl">Derive Session Keys</span>
+                    </button>
+                    <button class="sim-step-btn" data-step="4" id="sim-btn-step4">
+                        <span class="step-num">4</span>
+                        <span class="step-lbl">Send Ratchet Messages</span>
+                    </button>
+                </div>
+
+                <div class="simulator-display">
+                    <div class="sim-pane active" id="pane-step1">
+                        <h3>1. Key Generation</h3>
+                        <p>Both Alice and Bob generate paired classical identity keys (X25519) and post-quantum keys (ML-KEM-1024). Click to generate their keypairs.</p>
+                        <div class="sim-action-area">
+                            <button class="btn btn-primary" id="btn-gen-keys">Generate Keys</button>
+                        </div>
+                        <div class="keys-display">
+                            <div class="key-box">
+                                <strong>Alice's Public Keys</strong>
+                                <span class="key-str text-muted" id="alice-key-display">Not Generated</span>
+                            </div>
+                            <div class="key-box">
+                                <strong>Bob's Public Keys</strong>
+                                <span class="key-str text-muted" id="bob-key-display">Not Generated</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sim-pane" id="pane-step2">
+                        <h3>2. Pre-Key Bundle Upload</h3>
+                        <p>Bob registers and uploads his Identity Key and Signed Pre-Key to our hosted cloud Key Server so that Alice can start a session with him offline.</p>
+                        <div class="sim-action-area">
+                            <button class="btn btn-primary" id="btn-upload-bundle" disabled>Upload Bob's Pre-key Bundle</button>
+                        </div>
+                        <div class="console-terminal" id="terminal-step2">
+                            <span class="text-muted">// Ready to upload...</span>
+                        </div>
+                    </div>
+
+                    <div class="sim-pane" id="pane-step3">
+                        <h3>3. Hybrid Key Derivation</h3>
+                        <p>Alice fetches Bob's bundle and mixes entropy from the X25519 DH exchange and ML-KEM-1024 encapsulation using BLAKE3 to establish a unified root key.</p>
+                        <div class="sim-action-area">
+                            <button class="btn btn-primary" id="btn-derive-sk" disabled>Derive Root Keys</button>
+                        </div>
+                        <div class="console-terminal" id="terminal-step3">
+                            <span class="text-muted">// Ready to derive...</span>
+                        </div>
+                    </div>
+
+                    <div class="sim-pane" id="pane-step4">
+                        <h3>4. Encrypted Chat Simulator</h3>
+                        <p>Alice and Bob can now exchange messages. For every single message sent, their keys ratchet forward, ensuring perfect forward secrecy.</p>
+                        <div class="chat-wrapper">
+                            <div class="chat-box" id="chat-messages">
+                                <div class="chat-msg system">Session established. Send a message to initiate the ratchet.</div>
+                            </div>
+                            <div class="chat-input-bar">
+                                <input type="text" placeholder="Type a message..." id="chat-input-field" disabled>
+                                <button class="btn btn-primary btn-sm" id="chat-send-btn" disabled>Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Documentation TABS -->
+    <section class="code-section" id="code">
+        <div class="code-container">
+            <div class="section-header">
+                <div class="badge">DEVELOPER REFERENCE</div>
+                <h2 class="section-title">Built for Mobile & Web Developers</h2>
+                <p class="section-desc">
+                    Drop our native FFI packages directly into your codebase. Here is how easy it is to initialize a secure session.
+                </p>
+            </div>
+
+            <div class="code-tabs">
+                <div class="tab-headers">
+                    <button class="tab-header-btn active" data-tab="flutter" id="tab-btn-flutter">Flutter / Dart</button>
+                    <button class="tab-header-btn" data-tab="rust" id="tab-btn-rust">Rust Crate</button>
+                    <button class="tab-header-btn" data-tab="c" id="tab-btn-c">C/C++ Header</button>
+                </div>
+
+                <div class="tab-contents">
+                    <!-- Flutter code -->
+                    <div class="tab-content-pane active" id="tab-pane-flutter">
+                        <pre><code><span class="keyword">import</span> <span class="string">'package:pq_aura_flutter/pq_aura_flutter.dart'</span>;
+
+<span class="comment">// 1. Generate local hybrid keys (X25519 + ML-KEM-1024)</span>
+<span class="type">PqKeyPair</span> aliceKeyPair = <span class="type">PqAuraClient</span>.generateKeyPair();
+
+<span class="comment">// 2. Fetch Bob's pre-key bundle from your server</span>
+<span class="type">PqPreKeyBundle</span> bobBundle = <span class="type">PqPreKeyBundle</span>.fromJson(bobBundleJson);
+
+<span class="comment">// 3. Initiate the handshake</span>
+<span class="keyword">var</span> handshake = <span class="type">PqAuraClient</span>.initAlice(
+  remoteBundle: bobBundle,
+  localIdentityKeyPair: aliceKeyPair,
+);
+
+<span class="type">PqSession</span> aliceSession = handshake.session;
+<span class="type">PqInitialMessage</span> initialMsg = handshake.initialMessage;
+
+<span class="comment">// 4. Encrypt message payload</span>
+<span class="type">PqMessage</span> encrypted = aliceSession.encrypt(
+  <span class="type">Uint8List</span>.fromList(<span class="string">"Hello Bob!"</span>.codeUnits),
+  associatedData,
+);</code></pre>
+                    </div>
+
+                    <!-- Rust code -->
+                    <div class="tab-content-pane" id="tab-pane-rust">
+                        <pre><code><span class="keyword">use</span> pq_aura::handshake::<span class="type">HandshakeEngine</span>;
+<span class="keyword">use</span> pq_aura::<span class="type">RatchetEngine</span>;
+
+<span class="comment">// Alice initiates the session using Bob's bundle</span>
+<span class="keyword">let</span> (mut alice_state, initial_msg, root_key) = 
+    <span class="type">HandshakeEngine</span>::initiate_alice(
+        &amp;bob_bundle, 
+        &amp;alice_id_pk, 
+        &amp;alice_id_sk, 
+        &amp;mut rng
+    );
+
+<span class="comment">// Encrypt message</span>
+<span class="keyword">let</span> message = <span class="type">RatchetEngine</span>::encrypt(
+    &amp;mut alice_state, 
+    <span class="keyword">b</span><span class="string">"Hello Bob!"</span>, 
+    associated_data, 
+    &amp;mut rng
+);</code></pre>
+                    </div>
+
+                    <!-- C code -->
+                    <div class="tab-content-pane" id="tab-pane-c">
+                        <pre><code><span class="keyword">#include</span> <span class="string">&lt;pq_aura.h&gt;</span>
+
+<span class="comment">// Generate keypair</span>
+<span class="type">FfiKeyPair</span>* keys = pqa_generate_keypair();
+
+<span class="comment">// Encrypt message</span>
+<span class="type">FfiMessage</span>* msg = pqa_encrypt(
+    state, 
+    plaintext, 
+    plaintext_len, 
+    ad, 
+    ad_len
+);
+
+<span class="comment">// Clean up memory</span>
+pqa_free_message(msg);
+pqa_free_keypair(keys);</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="pricing-container">
+            <div class="section-header">
+                <div class="badge">LICENSING</div>
+                <h2 class="section-title">Flexible Pricing, Dual Licensed</h2>
+                <p class="section-desc">
+                    Keep your code open source for free under GPLv3, or purchase a commercial license to protect your proprietary IP.
+                </p>
+            </div>
+
+            <div class="pricing-grid">
+                <div class="pricing-card" id="price-oss">
+                    <h3>Open Source</h3>
+                    <div class="price">$0</div>
+                    <p class="price-subtitle">Free forever under GPLv3</p>
+                    <ul class="price-features">
+                        <li>✔️ Full core library access</li>
+                        <li>✔️ community support</li>
+                        <li>⚠️ Forced open-source compliance (Copyleft)</li>
+                    </ul>
+                    <a href="#code" class="btn btn-secondary btn-block" id="btn-pricing-oss">Get Started</a>
+                </div>
+
+                <div class="pricing-card popular-card" id="price-commercial">
+                    <div class="card-badge">POPULAR</div>
+                    <h3>Commercial SDK</h3>
+                    <div class="price">$199<span>/mo</span></div>
+                    <p class="price-subtitle">For proprietary products</p>
+                    <ul class="price-features">
+                        <li>✔️ Permissive MIT-style License</li>
+                        <li>✔️ Flutter, React Native, Rust FFI support</li>
+                        <li>✔️ Bypass copyleft / Keep your code private</li>
+                        <li>✔️ Email tech support</li>
+                    </ul>
+                    <a href="https://stripe.com" class="btn btn-primary btn-block" id="btn-pricing-commercial">Buy SDK License</a>
+                </div>
+
+                <div class="pricing-card" id="price-enterprise">
+                    <h3>Enterprise</h3>
+                    <div class="price">Custom</div>
+                    <p class="price-subtitle">For banks, defense, and healthcare</p>
+                    <ul class="price-features">
+                        <li>✔️ FIPS 140-3 validation consulting</li>
+                        <li>✔️ Dedicated hosted pre-key cloud servers</li>
+                        <li>✔️ 24/7 Phone & slack support</li>
+                        <li>✔️ Custom cryptographic integration</li>
+                    </ul>
+                    <a href="https://calendly.com" class="btn btn-secondary btn-block" id="btn-pricing-enterprise">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <a href="#" class="logo">
+                    <span class="logo-icon">🛡️</span>
+                    <span class="logo-text">PQ-AURA</span>
+                </a>
+                <p>NIST FIPS 203 Hybrid Post-Quantum End-to-End Encryption SDK.</p>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2026 PQ-Aura. All rights reserved. Created by Shreyas Sengupta.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
