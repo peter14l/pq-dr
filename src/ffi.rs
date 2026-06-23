@@ -6,6 +6,7 @@ use rand::thread_rng;
 use std::ffi::CStr;
 use std::path::Path;
 use std::ptr::null_mut;
+use zeroize::Zeroize;
 
 use std::os::raw::c_char;
 
@@ -153,14 +154,16 @@ pub unsafe extern "C" fn pqa_free_message(msg_ptr: *mut FfiMessage) {
         return;
     }
     let msg = Box::from_raw(msg_ptr);
-    let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-        msg.header,
-        msg.header_len,
-    ));
-    let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-        msg.payload,
-        msg.payload_len,
-    ));
+    if !msg.header.is_null() {
+        let header_slice = std::slice::from_raw_parts_mut(msg.header, msg.header_len);
+        header_slice.zeroize();
+        let _ = Box::from_raw(header_slice as *mut [u8]);
+    }
+    if !msg.payload.is_null() {
+        let payload_slice = std::slice::from_raw_parts_mut(msg.payload, msg.payload_len);
+        payload_slice.zeroize();
+        let _ = Box::from_raw(payload_slice as *mut [u8]);
+    }
 }
 
 /// Frees a buffer allocated by the FFI.
@@ -172,7 +175,9 @@ pub unsafe extern "C" fn pqa_free_buffer(ptr: *mut u8, len: usize) {
     if ptr.is_null() {
         return;
     }
-    let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(ptr, len));
+    let slice = std::slice::from_raw_parts_mut(ptr, len);
+    slice.zeroize();
+    let _ = Box::from_raw(slice as *mut [u8]);
 }
 
 // ============================================================================
@@ -218,16 +223,14 @@ pub unsafe extern "C" fn pqa_free_keypair(kp_ptr: *mut FfiKeyPair) {
     }
     let kp = Box::from_raw(kp_ptr);
     if !kp.public_key.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            kp.public_key,
-            kp.public_key_len,
-        ));
+        let pk_slice = std::slice::from_raw_parts_mut(kp.public_key, kp.public_key_len);
+        pk_slice.zeroize();
+        let _ = Box::from_raw(pk_slice as *mut [u8]);
     }
     if !kp.secret_key.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            kp.secret_key,
-            kp.secret_key_len,
-        ));
+        let sk_slice = std::slice::from_raw_parts_mut(kp.secret_key, kp.secret_key_len);
+        sk_slice.zeroize();
+        let _ = Box::from_raw(sk_slice as *mut [u8]);
     }
 }
 
@@ -600,7 +603,8 @@ pub unsafe extern "C" fn pqa_deserialize_state(
 #[no_mangle]
 pub unsafe extern "C" fn pqa_free_state(state_ptr: *mut RatchetState) {
     if !state_ptr.is_null() {
-        let _ = Box::from_raw(state_ptr);
+        let mut state = Box::from_raw(state_ptr);
+        state.zeroize();
     }
 }
 
@@ -615,46 +619,39 @@ pub unsafe extern "C" fn pqa_free_initial_message(msg_ptr: *mut FfiInitialMessag
     }
     let msg = Box::from_raw(msg_ptr);
     if !msg.alice_identity_pk.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.alice_identity_pk,
-            msg.alice_identity_pk_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.alice_identity_pk, msg.alice_identity_pk_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
     if !msg.ephemeral_pk.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.ephemeral_pk,
-            msg.ephemeral_pk_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.ephemeral_pk, msg.ephemeral_pk_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
     if !msg.kem_ciphertext_identity.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.kem_ciphertext_identity,
-            msg.kem_ciphertext_identity_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.kem_ciphertext_identity, msg.kem_ciphertext_identity_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
     if !msg.kem_ciphertext_signed.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.kem_ciphertext_signed,
-            msg.kem_ciphertext_signed_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.kem_ciphertext_signed, msg.kem_ciphertext_signed_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
     if !msg.kem_ciphertext_one_time.is_null() && msg.has_one_time {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.kem_ciphertext_one_time,
-            msg.kem_ciphertext_one_time_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.kem_ciphertext_one_time, msg.kem_ciphertext_one_time_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
     if !msg.ratchet_message_header.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.ratchet_message_header,
-            msg.ratchet_message_header_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.ratchet_message_header, msg.ratchet_message_header_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
     if !msg.ratchet_message_payload.is_null() {
-        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
-            msg.ratchet_message_payload,
-            msg.ratchet_message_payload_len,
-        ));
+        let slice = std::slice::from_raw_parts_mut(msg.ratchet_message_payload, msg.ratchet_message_payload_len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
 }
 

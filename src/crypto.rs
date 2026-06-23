@@ -517,6 +517,22 @@ impl HybridSigningKey {
     }
 }
 
+impl Zeroize for HybridSigningKey {
+    fn zeroize(&mut self) {
+        let zero_seed = [0u8; 32];
+        self.classic = ed25519_dalek::SigningKey::from_bytes(&zero_seed);
+        self.quantum = ml_dsa::SigningKey::<ml_dsa::MlDsa65>::from_seed(&zero_seed.into());
+    }
+}
+
+impl Drop for HybridSigningKey {
+    fn drop(&mut self) {
+        self.zeroize();
+    }
+}
+
+impl ZeroizeOnDrop for HybridSigningKey {}
+
 impl HybridVerifyingKey {
     /// Verifies a hybrid signature against a message.
     pub fn verify(&self, message: &[u8], signature: &HybridSignature) -> Result<(), &'static str> {

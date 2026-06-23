@@ -223,8 +223,6 @@ impl RatchetState {
     }
 }
 
-// Custom implementation for HybridPublicKey because Encoded<MlKem1024> might not be easily zeroable
-// but we wrap secrets in Zeroize. Public keys are usually okay but let's be safe.
 impl Zeroize for HybridPublicKey {
     fn zeroize(&mut self) {
         // Public keys don't strictly need zeroizing but we can zero the bytes if accessible
