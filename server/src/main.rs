@@ -213,9 +213,12 @@ async fn fetch_prekey(
     Path(username): Path<String>,
     State(state): State<SharedState>,
 ) -> Result<Json<PreKeyBundle>, StatusCode> {
-    let db = state.lock().unwrap();
-    if let Some(bundle) = db.bundles.get(&username) {
-        Ok(Json(bundle.clone()))
+    let mut db = state.lock().unwrap();
+    if let Some(bundle) = db.bundles.get_mut(&username) {
+        let returned_bundle = bundle.clone();
+        // Consume the one-time pre-key so it cannot be used again
+        bundle.one_time_pre_key = None;
+        Ok(Json(returned_bundle))
     } else {
         Err(StatusCode::NOT_FOUND)
     }
