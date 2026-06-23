@@ -624,7 +624,7 @@ async fn send_license_email(
             <ol style="margin:0;padding-left:20px;color:#475569;font-size:14px;line-height:2;">
               <li>Add <code style="color:#4f46e5;background-color:#eff6ff;padding:2px 6px;border-radius:4px;font-family:monospace;">pq-aura</code> to your <code style="color:#4f46e5;background-color:#eff6ff;padding:2px 6px;border-radius:4px;font-family:monospace;">Cargo.toml</code> dependencies.</li>
               <li>Store your license key as an environment variable: <code style="color:#4f46e5;background-color:#eff6ff;padding:2px 6px;border-radius:4px;font-family:monospace;">PQ_AURA_LICENSE_KEY</code>.</li>
-              <li>You may use this license in <strong style="color:#0f172a;">one commercial product</strong>. Contact us for multi-seat/enterprise support.</li>
+              <li>You may use this license in <strong style="color:#0f172a;">one product</strong> under your active <strong style="color:#0f172a;">{plan}</strong>. Contact us for multi-seat/enterprise support.</li>
               <li>Renew before <strong style="color:#0f172a;">{valid_until}</strong> to avoid service interruption.</li>
             </ol>
           </div>
