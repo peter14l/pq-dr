@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Shreyas Sengupta"]
 description = "A Hybrid Post-Quantum Double Ratchet library"
+license = "GPL-3.0-only"
+repository = "https://github.com/peter14l/pq-dr"
+homepage = "https://github.com/peter14l/pq-dr"
+documentation = "https://docs.rs/pq-aura"
+readme = "README.md"
 
 [dependencies]
 # Quantum-resistant KEM (FIPS 203)
