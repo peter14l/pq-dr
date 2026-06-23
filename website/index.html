@@ -222,7 +222,7 @@
 
                     <div class="sim-pane" id="pane-step2">
                         <h3>2. Pre-Key Bundle Upload</h3>
-                        <p>Bob registers and uploads his Identity Key and Signed Pre-Key to our hosted cloud Key Server so that Alice can start a session with him offline.</p>
+                        <p>Bob registers and uploads his Identity Key and Signed Pre-Key to our hosted cloud Key Server (run on a <a href="https://huggingface.co/spaces/peter14l/pq-aura-server" target="_blank" style="color: var(--accent-primary); text-decoration: underline;">Hugging Face Docker Space</a>) so that Alice can start a session with him offline.</p>
                         <div class="sim-action-area">
                             <button class="btn btn-primary" id="btn-upload-bundle" disabled>Upload Bob's Pre-key Bundle</button>
                         </div>
@@ -307,6 +307,9 @@
 
                     <!-- Rust code -->
                     <div class="tab-content-pane" id="tab-pane-rust">
+                        <div style="margin-bottom: 12px; font-size: 0.95rem; color: var(--text-muted);">
+                            Published Crate: <a href="https://crates.io/crates/pq-aura" target="_blank" style="color: var(--accent-primary); text-decoration: underline; font-weight: 500;">crates.io/crates/pq-aura</a>
+                        </div>
                         <pre><code><span class="keyword">use</span> pq_aura::handshake::<span class="type">HandshakeEngine</span>;
 <span class="keyword">use</span> pq_aura::<span class="type">RatchetEngine</span>;
 
@@ -428,6 +431,10 @@ pqa_free_keypair(keys);</code></pre>
                     <span class="logo-text">PQ-AURA</span>
                 </a>
                 <p>NIST FIPS 203 Hybrid Post-Quantum End-to-End Encryption SDK.</p>
+                <p style="margin-top:12px; font-size:0.9rem;">
+                    <a href="https://crates.io/crates/pq-aura" target="_blank" style="color:var(--text-muted);text-decoration:none;margin-right:16px;transition:color 0.2s;" onmouseover="this.style.color='var(--accent-primary)'" onmouseout="this.style.color='var(--text-muted)'">Rust Crate (crates.io)</a>
+                    <a href="https://huggingface.co/spaces/peter14l/pq-aura-server" target="_blank" style="color:var(--text-muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--accent-primary)'" onmouseout="this.style.color='var(--text-muted)'">Docker Key Server (Hugging Face)</a>
+                </p>
             </div>
             <div class="footer-right">
                 <p>&copy; 2026 PQ-Aura. All rights reserved. Created by Shreyas Sengupta.</p>
