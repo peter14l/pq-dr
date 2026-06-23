@@ -33,8 +33,12 @@ pub struct FfiKeyPair {
 pub struct FfiPreKeyBundle {
     pub identity_pk: *mut u8,
     pub identity_pk_len: usize,
+    pub identity_verifying_key: *mut u8,
+    pub identity_verifying_key_len: usize,
     pub signed_pre_key: *mut u8,
     pub signed_pre_key_len: usize,
+    pub signature: *mut u8,
+    pub signature_len: usize,
     pub one_time_pre_key: *mut u8,
     pub one_time_pre_key_len: usize,
     pub has_one_time: bool,
@@ -237,8 +241,10 @@ pub unsafe extern "C" fn pqa_free_keypair(kp_ptr: *mut FfiKeyPair) {
 pub unsafe extern "C" fn pqa_create_bundle(
     identity_pk_ptr: *const u8,
     identity_pk_len: usize,
+    signing_key_ptr: *const u8,
+    signing_key_len: usize,
 ) -> *mut FfiPreKeyBundle {
-    if identity_pk_ptr.is_null() {
+    if identity_pk_ptr.is_null() || signing_key_ptr.is_null() {
         return std::ptr::null_mut();
     }
     let identity_pk_bytes = std::slice::from_raw_parts(identity_pk_ptr, identity_pk_len);
@@ -247,35 +253,55 @@ pub unsafe extern "C" fn pqa_create_bundle(
         Err(_) => return null_mut(),
     };
 
+    let signing_key_bytes = std::slice::from_raw_parts(signing_key_ptr, signing_key_len);
+    let signing_key = match crypto::HybridSigningKey::from_bytes(signing_key_bytes) {
+        Ok(sk) => sk,
+        Err(_) => return null_mut(),
+    };
+
     let mut rng = thread_rng();
 
     // Generate signed pre-key
     let (signed_pk, _signed_sk) = crypto::generate_hybrid_keypair(&mut rng);
+
+    // Generate signature over signed pre-key
+    let signature = signing_key.sign(&signed_pk.to_bytes());
+    let verifying_key = signing_key.verifying_key();
 
     // Generate one-time pre-key
     let (ot_pk, _ot_sk) = crypto::generate_hybrid_keypair(&mut rng);
 
     let bundle = PreKeyBundle {
         identity_pk,
+        identity_verifying_key: verifying_key,
         signed_pre_key: signed_pk,
+        signature,
         one_time_pre_key: Some(ot_pk),
     };
 
-    // Serialize bundle components using to_bytes()
+    // Serialize bundle components
     let identity_pk_bytes = bundle.identity_pk.to_bytes();
+    let verifying_key_bytes = bundle.identity_verifying_key.to_bytes();
     let signed_pk_bytes = bundle.signed_pre_key.to_bytes();
+    let signature_bytes = bundle.signature.to_bytes();
     let ot_pk_bytes = bundle.one_time_pre_key.as_ref().map(|pk| pk.to_bytes());
 
     let identity_pk_len = identity_pk_bytes.len();
+    let verifying_key_len = verifying_key_bytes.len();
     let signed_pre_key_len = signed_pk_bytes.len();
+    let signature_len = signature_bytes.len();
     let one_time_pre_key_len = ot_pk_bytes.as_ref().map(|v| v.len()).unwrap_or(0);
     let has_one_time = ot_pk_bytes.is_some();
 
     let ffi_bundle = Box::new(FfiPreKeyBundle {
         identity_pk: Box::into_raw(identity_pk_bytes.into_boxed_slice()) as *mut u8,
         identity_pk_len,
+        identity_verifying_key: Box::into_raw(verifying_key_bytes.into_boxed_slice()) as *mut u8,
+        identity_verifying_key_len: verifying_key_len,
         signed_pre_key: Box::into_raw(signed_pk_bytes.into_boxed_slice()) as *mut u8,
         signed_pre_key_len,
+        signature: Box::into_raw(signature_bytes.into_boxed_slice()) as *mut u8,
+        signature_len,
         one_time_pre_key: ot_pk_bytes
             .map(|v| Box::into_raw(v.into_boxed_slice()) as *mut u8)
             .unwrap_or(null_mut()),
@@ -302,10 +328,22 @@ pub unsafe extern "C" fn pqa_free_bundle(bundle_ptr: *mut FfiPreKeyBundle) {
             bundle.identity_pk_len,
         ));
     }
+    if !bundle.identity_verifying_key.is_null() {
+        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+            bundle.identity_verifying_key,
+            bundle.identity_verifying_key_len,
+        ));
+    }
     if !bundle.signed_pre_key.is_null() {
         let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
             bundle.signed_pre_key,
             bundle.signed_pre_key_len,
+        ));
+    }
+    if !bundle.signature.is_null() {
+        let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+            bundle.signature,
+            bundle.signature_len,
         ));
     }
     if !bundle.one_time_pre_key.is_null() && bundle.has_one_time {
@@ -362,12 +400,15 @@ pub unsafe extern "C" fn pqa_init_alice(
     };
 
     let mut rng = thread_rng();
-    let (state, initial_msg, _root_key) = HandshakeEngine::initiate_alice(
+    let (state, initial_msg, _root_key) = match HandshakeEngine::initiate_alice(
         &remote_bundle,
         &local_identity_pk,
         &local_identity_sk,
         &mut rng,
-    );
+    ) {
+        Ok(res) => res,
+        Err(_) => return null_mut(),
+    };
 
     // Box the state and get pointer
     let state_box = Box::new(state);

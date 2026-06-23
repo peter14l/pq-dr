@@ -110,14 +110,22 @@ fn test_pq_x3dh_handshake() {
     use pq_aura::handshake::*;
     let mut rng = thread_rng();
 
-    // 1. Bob generates his keys and publishes a PreKeyBundle
+    // 1. Bob generates his signing keys, KEM keys, and publishes a PreKeyBundle
+    let bob_signing_sk = HybridSigningKey::generate(&mut rng);
+    let bob_verifying_key = bob_signing_sk.verifying_key();
+
     let (bob_id_pk, bob_id_sk) = generate_hybrid_keypair(&mut rng);
     let (bob_signed_pk, bob_signed_sk) = generate_hybrid_keypair(&mut rng);
     let (bob_ot_pk, bob_ot_sk) = generate_hybrid_keypair(&mut rng);
 
+    // Sign the signed pre-key using Bob's identity signing key
+    let signature = bob_signing_sk.sign(&bob_signed_pk.to_bytes());
+
     let bundle = PreKeyBundle {
         identity_pk: bob_id_pk.clone(),
+        identity_verifying_key: bob_verifying_key,
         signed_pre_key: bob_signed_pk,
+        signature,
         one_time_pre_key: Some(bob_ot_pk),
     };
 
@@ -126,7 +134,7 @@ fn test_pq_x3dh_handshake() {
 
     // 3. Alice initiates the handshake using Bob's bundle
     let (mut _alice_state, initial_msg, alice_root_key) =
-        HandshakeEngine::initiate_alice(&bundle, &alice_id_pk, &alice_id_sk, &mut rng);
+        HandshakeEngine::initiate_alice(&bundle, &alice_id_pk, &alice_id_sk, &mut rng).unwrap();
 
     // 4. Bob receives the initial message and responds
     let (_bob_state, bob_root_key) = HandshakeEngine::respond_bob(

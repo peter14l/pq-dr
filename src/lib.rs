@@ -19,6 +19,7 @@ pub mod wasm;
 pub use crypto::{
     combine_secrets, generate_hybrid_keypair, hybrid_decapsulate, hybrid_encapsulate,
     HybridPublicKey, HybridSecretKey, SecretKeyMaterial,
+    HybridSigningKey, HybridVerifyingKey, HybridSignature,
 };
 pub use ratchet::{Header, Message, RatchetEngine};
 pub use state::RatchetState;

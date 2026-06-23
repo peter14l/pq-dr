@@ -8,7 +8,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PreKeyBundle {
     pub identity_pk: HybridPublicKey,
+    pub identity_verifying_key: crate::crypto::HybridVerifyingKey,
     pub signed_pre_key: HybridPublicKey,
+    pub signature: crate::crypto::HybridSignature,
     // For simplicity in this implementation, we use a single one-time pre-key.
     // In production, Bob would upload a batch of these.
     pub one_time_pre_key: Option<HybridPublicKey>,
@@ -60,7 +62,11 @@ impl HandshakeEngine {
         alice_identity_pk: &HybridPublicKey,
         alice_identity_sk: &HybridSecretKey,
         rng: &mut R,
-    ) -> (RatchetState, InitialMessage, SecretKeyMaterial) {
+    ) -> Result<(RatchetState, InitialMessage, SecretKeyMaterial), &'static str> {
+        // 0. Verify the signature on Bob's signed_pre_key using his identity verifying key
+        let signed_pre_key_bytes = bundle.signed_pre_key.to_bytes();
+        bundle.identity_verifying_key.verify(&signed_pre_key_bytes, &bundle.signature)?;
+
         // 1. Generate ephemeral keypair
         let (ephemeral_pk, ephemeral_sk) = crypto::generate_hybrid_keypair(rng);
 
@@ -133,7 +139,7 @@ impl HandshakeEngine {
             },
         };
 
-        (state, initial_msg, root_key)
+        Ok((state, initial_msg, root_key))
     }
 
     /// Bob responds to Alice's InitialMessage using his local secret keys.

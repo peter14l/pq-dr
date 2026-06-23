@@ -437,3 +437,186 @@ pub mod serde_quantum_secretkey {
         Ok(DecapsulationKey::from_bytes(array))
     }
 }
+
+// ─────────────────────────────────────────────
+// Hybrid Signatures (Ed25519 + ML-DSA-65)
+// ─────────────────────────────────────────────
+
+use ed25519_dalek::{Signer as ClassicSigner, Verifier as ClassicVerifier};
+use ml_dsa::signature::{Signer as QuantumSigner, Verifier as QuantumVerifier};
+use ml_dsa::{Keypair, SignatureEncoding};
+
+/// Hybrid Signing Key containing both Ed25519 and ML-DSA-65 components.
+pub struct HybridSigningKey {
+    pub classic: ed25519_dalek::SigningKey,
+    pub quantum: ml_dsa::SigningKey<ml_dsa::MlDsa65>,
+}
+
+/// Hybrid Verifying Key containing both Ed25519 and ML-DSA-65 components.
+#[derive(Clone, PartialEq)]
+pub struct HybridVerifyingKey {
+    pub classic: ed25519_dalek::VerifyingKey,
+    pub quantum: ml_dsa::VerifyingKey<ml_dsa::MlDsa65>,
+}
+
+/// Hybrid Signature containing both Ed25519 and ML-DSA-65 components.
+#[derive(Clone, PartialEq)]
+pub struct HybridSignature {
+    pub classic: ed25519_dalek::Signature,
+    pub quantum: ml_dsa::Signature<ml_dsa::MlDsa65>,
+}
+
+impl HybridSigningKey {
+    /// Generates a new Hybrid Signing Keypair.
+    pub fn generate<R: RngCore + CryptoRng>(rng: &mut R) -> Self {
+        // Generate Ed25519 keypair
+        let mut ed_bytes = [0u8; 32];
+        rng.fill_bytes(&mut ed_bytes);
+        let classic = ed25519_dalek::SigningKey::from_bytes(&ed_bytes);
+
+        // Generate ML-DSA-65 keypair
+        let mut q_seed = [0u8; 32];
+        rng.fill_bytes(&mut q_seed);
+        let quantum = ml_dsa::SigningKey::<ml_dsa::MlDsa65>::from_seed(&q_seed.into());
+
+        Self { classic, quantum }
+    }
+
+    /// Access the verifying key.
+    pub fn verifying_key(&self) -> HybridVerifyingKey {
+        HybridVerifyingKey {
+            classic: self.classic.verifying_key(),
+            quantum: self.quantum.verifying_key(),
+        }
+    }
+
+    /// Signs a message using both classical and quantum algorithms.
+    pub fn sign(&self, message: &[u8]) -> HybridSignature {
+        let classic = self.classic.sign(message);
+        let quantum = self.quantum.sign(message);
+        HybridSignature { classic, quantum }
+    }
+
+    /// Serializes the hybrid signing key to bytes.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.classic.to_bytes());
+        bytes.extend_from_slice(self.quantum.as_seed().as_slice());
+        bytes
+    }
+
+    /// Deserializes the hybrid signing key from bytes.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        if bytes.len() != 64 {
+            return Err("Invalid hybrid signing key length");
+        }
+        let (classic_bytes, quantum_bytes) = bytes.split_at(32);
+        let classic = ed25519_dalek::SigningKey::from_bytes(classic_bytes.try_into().unwrap());
+        let quantum = ml_dsa::SigningKey::<ml_dsa::MlDsa65>::from_seed(quantum_bytes.try_into().unwrap());
+        Ok(Self { classic, quantum })
+    }
+}
+
+impl HybridVerifyingKey {
+    /// Verifies a hybrid signature against a message.
+    pub fn verify(&self, message: &[u8], signature: &HybridSignature) -> Result<(), &'static str> {
+        // 1. Verify classical Ed25519 signature
+        self.classic
+            .verify(message, &signature.classic)
+            .map_err(|_| "Classical Ed25519 verification failed")?;
+
+        // 2. Verify post-quantum ML-DSA-65 signature
+        self.quantum
+            .verify(message, &signature.quantum)
+            .map_err(|_| "Post-Quantum ML-DSA verification failed")?;
+
+        Ok(())
+    }
+
+    /// Serializes the hybrid verifying key to bytes.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.classic.to_bytes());
+        bytes.extend_from_slice(self.quantum.encode().as_slice());
+        bytes
+    }
+
+    /// Deserializes the hybrid verifying key from bytes.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        // Ed25519: 32 bytes verifying key.
+        // ML-DSA-65: 1952 bytes verifying key.
+        if bytes.len() != 32 + 1952 {
+            return Err("Invalid hybrid verifying key length");
+        }
+        let (classic_bytes, quantum_bytes) = bytes.split_at(32);
+        let classic = ed25519_dalek::VerifyingKey::from_bytes(classic_bytes.try_into().unwrap())
+            .map_err(|_| "Invalid Ed25519 verifying key")?;
+        let quantum = ml_dsa::VerifyingKey::<ml_dsa::MlDsa65>::decode(
+            quantum_bytes.try_into().map_err(|_| "Invalid ML-DSA verifying key length")?
+        );
+        Ok(Self { classic, quantum })
+    }
+}
+
+impl HybridSignature {
+    /// Serializes the hybrid signature to bytes.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.classic.to_bytes());
+        bytes.extend_from_slice(self.quantum.to_bytes().as_slice());
+        bytes
+    }
+
+    /// Deserializes the hybrid signature from bytes.
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
+        // Ed25519 signature: 64 bytes.
+        // ML-DSA-65 signature: 3300 bytes.
+        if bytes.len() != 64 + 3300 {
+            return Err("Invalid hybrid signature length");
+        }
+        let (classic_bytes, quantum_bytes) = bytes.split_at(64);
+        let classic = ed25519_dalek::Signature::from_bytes(classic_bytes.try_into().unwrap());
+        let quantum = ml_dsa::Signature::<ml_dsa::MlDsa65>::decode(
+            quantum_bytes.try_into().map_err(|_| "Invalid ML-DSA signature length")?
+        ).ok_or("Invalid ML-DSA signature")?;
+        Ok(Self { classic, quantum })
+    }
+}
+
+impl Serialize for HybridVerifyingKey {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_bytes().serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for HybridVerifyingKey {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bytes = Vec::<u8>::deserialize(deserializer)?;
+        Self::from_bytes(&bytes).map_err(serde::de::Error::custom)
+    }
+}
+
+impl Serialize for HybridSignature {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_bytes().serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for HybridSignature {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bytes = Vec::<u8>::deserialize(deserializer)?;
+        Self::from_bytes(&bytes).map_err(serde::de::Error::custom)
+    }
+}
