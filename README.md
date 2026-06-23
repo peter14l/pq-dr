@@ -136,7 +136,7 @@ PQ-Aura uses a **dual-licensing model**. The library is free under GPL-3.0 for o
 |------|-------|---------|
 | **Open Source** | Free | GPL-3.0 — source must stay open |
 | **Commercial SDK** | ₹16,500 / month | Removes copyleft for proprietary apps |
-| **Enterprise** | Custom | Multi-seat, self-hosted, SLA — email support@pqaura.dev |
+| **Enterprise** | Custom | Multi-seat, self-hosted, SLA — email peter_parker_2008@outlook.com |
 
 The payment system (Razorpay + Resend email) is fully implemented in the server. For complete setup instructions — including Razorpay webhook registration, Resend domain verification, environment variables, Hugging Face Spaces secrets, and end-to-end testing — see **[PAYMENTS.md](PAYMENTS.md)**.
 

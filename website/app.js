@@ -36,11 +36,11 @@ function injectPaymentModal() {
                 <p class="psm-next-title">What happens next?</p>
                 <ol class="psm-steps">
                     <li>Your <strong>license key &amp; invoice</strong> have been emailed to you instantly.</li>
-                    <li>Check your inbox (and spam folder) for an email from <strong>support@pqaura.dev</strong>.</li>
+                    <li>Check your inbox (and spam folder) for an email from <strong>onboarding@resend.dev</strong>.</li>
                     <li>Add the license key as <code>PQ_AURA_LICENSE_KEY</code> in your project's environment.</li>
                 </ol>
             </div>
-            <p class="psm-support">Questions? Email <a href="mailto:support@pqaura.dev">support@pqaura.dev</a></p>
+            <p class="psm-support">Questions? Email <a href="mailto:peter_parker_2008@outlook.com">peter_parker_2008@outlook.com</a></p>
             <button class="btn btn-primary psm-close-btn" id="psm-close-btn">Close</button>
         </div>
     `;

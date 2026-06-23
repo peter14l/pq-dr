@@ -534,7 +534,7 @@ async fn send_license_email(
         std::env::var("RESEND_API_KEY").map_err(|_| "RESEND_API_KEY not set".to_string())?;
 
     let from_email =
-        std::env::var("FROM_EMAIL").unwrap_or_else(|_| "support@pqaura.dev".to_string());
+        std::env::var("FROM_EMAIL").unwrap_or_else(|_| "onboarding@resend.dev".to_string());
 
     let html_body = format!(
         r#"<!DOCTYPE html>
@@ -634,14 +634,14 @@ async fn send_license_email(
         <tr><td style="padding:20px 40px 0;">
           <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">
             <strong style="color:#64748b;">Refund Policy:</strong> You are entitled to a full refund within 7 days of purchase.
-            Email <a href="mailto:support@pqaura.dev" style="color:#6366f1;text-decoration:none;">support@pqaura.dev</a> with your Order ID.
+            Email <a href="mailto:peter_parker_2008@outlook.com" style="color:#6366f1;text-decoration:none;">peter_parker_2008@outlook.com</a> with your Order ID.
           </p>
         </td></tr>
 
         <!-- Footer -->
         <tr><td style="padding:32px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);margin-top:28px;">
           <p style="margin:0;font-size:13px;color:#334155;">
-            Questions? <a href="mailto:support@pqaura.dev" style="color:#6366f1;text-decoration:none;">support@pqaura.dev</a>
+            Questions? <a href="mailto:peter_parker_2008@outlook.com" style="color:#6366f1;text-decoration:none;">peter_parker_2008@outlook.com</a>
           </p>
           <p style="margin:8px 0 0;font-size:12px;color:#1e293b;">
             PQ-Aura &middot; Post-Quantum Secure Messaging SDK &middot; India
