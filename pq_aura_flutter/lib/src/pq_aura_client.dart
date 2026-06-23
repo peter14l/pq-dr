@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'ffi_bindings.dart' as ffi;
@@ -143,6 +144,37 @@ class PqAuraClient {
       if (localOtSkPtr != nullptr) {
         malloc.free(localOtSkPtr);
       }
+    }
+  }
+
+  /// Sets the license key and checks validity with the key server.
+  /// If the server is offline or the license is not active, this returns false.
+  static Future<bool> verifyLicense({
+    required String licenseKey,
+    required String serverUrl,
+  }) async {
+    try {
+      final client = HttpClient();
+      final uri = Uri.parse('$serverUrl/license/verify');
+      final request = await client.postUrl(uri);
+      request.headers.contentType = ContentType.json;
+      
+      final payload = jsonEncode({'license_key': licenseKey});
+      request.write(payload);
+      
+      final response = await request.close();
+      if (response.statusCode == 200) {
+        final content = await response.transform(utf8.decoder).join();
+        final data = jsonDecode(content);
+        final verified = data['status'] == 'Active';
+        _bindings.setLicenseVerified(verified);
+        return verified;
+      }
+      _bindings.setLicenseVerified(false);
+      return false;
+    } catch (_) {
+      _bindings.setLicenseVerified(false);
+      return false;
     }
   }
 }

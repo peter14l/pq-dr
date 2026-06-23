@@ -181,6 +181,7 @@ pub unsafe extern "C" fn pqa_free_buffer(ptr: *mut u8, len: usize) {
 /// Returns a pointer to an FfiKeyPair. Caller must free with pqa_free_keypair.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_generate_keypair() -> *mut FfiKeyPair {
+    check_compliance_notice();
     let mut rng = thread_rng();
     let (public_key, secret_key) = crypto::generate_hybrid_keypair(&mut rng);
 
@@ -670,3 +671,31 @@ pub unsafe extern "C" fn pqa_load_atomic(
         Err(_) => std::ptr::null_mut(),
     }
 }
+
+// ─────────────────────────────────────────────
+// SDK License Enforcement & Compliance Tracking
+// ─────────────────────────────────────────────
+static mut LICENSE_VERIFIED: bool = false;
+
+/// Verifies whether the commercial license check has succeeded.
+#[no_mangle]
+pub unsafe extern "C" fn pqa_is_license_verified() -> bool {
+    LICENSE_VERIFIED
+}
+
+/// Sets the license verification state (e.g. called from Dart after network check).
+#[no_mangle]
+pub unsafe extern "C" fn pqa_set_license_verified(verified: bool) {
+    LICENSE_VERIFIED = verified;
+}
+
+/// Prints compliance watermark notice if not commercially verified.
+pub unsafe fn check_compliance_notice() {
+    if !LICENSE_VERIFIED {
+        println!(
+            "[PQ-AURA INFO] Running under Open Source GPLv3 license rules. \
+            If this app is proprietary/commercial, a valid license key must be supplied."
+        );
+    }
+}
+

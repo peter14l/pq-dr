@@ -17,13 +17,12 @@ use tower_http::cors::CorsLayer;
 use uuid::Uuid;
 
 // ─────────────────────────────────────────────
-// In-memory database (messaging + orders + licenses)
+// Database State & Schemas (Ephemeral Messaging + SQLite Orders/Licenses)
 // ─────────────────────────────────────────────
 struct Db {
     bundles: HashMap<String, PreKeyBundle>,
     mailbox: HashMap<String, VecDeque<Message>>,
-    orders: Vec<Order>,
-    licenses: Vec<License>,
+    conn: rusqlite::Connection,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -46,6 +45,7 @@ struct License {
     plan: String,
     issued_at: String,
     valid_until: String,
+    revoked: bool,
 }
 
 type SharedState = Arc<Mutex<Db>>;
@@ -73,6 +73,20 @@ struct FetchMessagesResponse {
 #[derive(Serialize)]
 struct ConfigResponse {
     razorpay_key_id: String,
+}
+
+// License verification request/response
+#[derive(Deserialize)]
+struct VerifyLicenseRequest {
+    license_key: String,
+}
+
+#[derive(Serialize)]
+struct VerifyLicenseResponse {
+    status: String, // "Active", "Expired", "Revoked", "Not Found"
+    customer_email: Option<String>,
+    plan: Option<String>,
+    valid_until: Option<String>,
 }
 
 // Razorpay webhook body shape for payment.captured
@@ -118,11 +132,46 @@ struct RazorpayNotes {
 async fn main() {
     dotenvy::dotenv().ok();
 
+    // Open connection to SQLite
+    let db_path = std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite.db".to_string());
+    let conn = rusqlite::Connection::open(&db_path).expect("Failed to open SQLite database");
+
+    // Enable foreign key support
+    conn.execute_batch("PRAGMA foreign_keys = ON;").ok();
+
+    // Run table migrations
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS orders (
+            order_id TEXT PRIMARY KEY,
+            payment_id TEXT UNIQUE,
+            customer_email TEXT,
+            customer_name TEXT,
+            plan TEXT,
+            amount_paise INTEGER,
+            currency TEXT,
+            created_at TEXT
+        )",
+        [],
+    ).expect("Failed to create orders table");
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS licenses (
+            license_key TEXT PRIMARY KEY,
+            order_id TEXT,
+            customer_email TEXT,
+            plan TEXT,
+            issued_at TEXT,
+            valid_until TEXT,
+            revoked INTEGER DEFAULT 0,
+            FOREIGN KEY(order_id) REFERENCES orders(order_id)
+        )",
+        [],
+    ).expect("Failed to create licenses table");
+
     let state: SharedState = Arc::new(Mutex::new(Db {
         bundles: HashMap::new(),
         mailbox: HashMap::new(),
-        orders: Vec::new(),
-        licenses: Vec::new(),
+        conn,
     }));
 
     let cors = CorsLayer::permissive();
@@ -136,8 +185,10 @@ async fn main() {
         // Config + payment routes
         .route("/config", get(get_config))
         .route("/webhook/razorpay", post(razorpay_webhook))
+        .route("/license/verify", post(verify_license))
         .layer(cors)
         .with_state(state);
+
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
@@ -203,6 +254,83 @@ async fn get_config() -> Json<ConfigResponse> {
     let razorpay_key_id =
         std::env::var("RAZORPAY_KEY_ID").unwrap_or_else(|_| "rzp_test_placeholder".to_string());
     Json(ConfigResponse { razorpay_key_id })
+}
+
+// ─────────────────────────────────────────────
+// /license/verify — returns validation status for a license key
+// ─────────────────────────────────────────────
+async fn verify_license(
+    State(state): State<SharedState>,
+    Json(payload): Json<VerifyLicenseRequest>,
+) -> Json<VerifyLicenseResponse> {
+    let db = state.lock().unwrap();
+
+    let query_result = db.conn.query_row(
+        "SELECT customer_email, plan, valid_until, revoked FROM licenses WHERE license_key = ?",
+        [&payload.license_key],
+        |row| {
+            let revoked_int: i32 = row.get(3)?;
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                revoked_int != 0,
+            ))
+        },
+    );
+
+    match query_result {
+        Ok((customer_email, plan, valid_until_str, revoked)) => {
+            if revoked {
+                return Json(VerifyLicenseResponse {
+                    status: "Revoked".to_string(),
+                    customer_email: Some(customer_email),
+                    plan: Some(plan),
+                    valid_until: Some(valid_until_str),
+                });
+            }
+
+            if let Ok(valid_until) = chrono::DateTime::parse_from_rfc3339(&valid_until_str) {
+                if Utc::now() > valid_until {
+                    return Json(VerifyLicenseResponse {
+                        status: "Expired".to_string(),
+                        customer_email: Some(customer_email),
+                        plan: Some(plan),
+                        valid_until: Some(valid_until_str),
+                    });
+                }
+
+                Json(VerifyLicenseResponse {
+                    status: "Active".to_string(),
+                    customer_email: Some(customer_email),
+                    plan: Some(plan),
+                    valid_until: Some(valid_until_str),
+                })
+            } else {
+                Json(VerifyLicenseResponse {
+                    status: "Expired".to_string(),
+                    customer_email: Some(customer_email),
+                    plan: Some(plan),
+                    valid_until: Some(valid_until_str),
+                })
+            }
+        }
+        Err(rusqlite::Error::QueryReturnedNoRows) => Json(VerifyLicenseResponse {
+            status: "Not Found".to_string(),
+            customer_email: None,
+            plan: None,
+            valid_until: None,
+        }),
+        Err(e) => {
+            eprintln!("[verify] Database error: {e}");
+            Json(VerifyLicenseResponse {
+                status: "Error".to_string(),
+                customer_email: None,
+                plan: None,
+                valid_until: None,
+            })
+        }
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -278,30 +406,64 @@ async fn razorpay_webhook(
         let mut db = state.lock().unwrap();
 
         // Idempotency guard — ignore replayed webhook deliveries
-        if db.orders.iter().any(|o| o.payment_id == payment_id) {
+        let exists: bool = db.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM orders WHERE payment_id = ?)",
+            [&payment_id],
+            |row| row.get(0),
+        ).unwrap_or(false);
+
+        if exists {
             eprintln!("[webhook] Duplicate payment_id {} — skipping", payment_id);
             return StatusCode::OK;
         }
 
-        db.orders.push(Order {
-            order_id: order_id.clone(),
-            payment_id: payment_id.clone(),
-            customer_email: customer_email.clone(),
-            customer_name: customer_name.clone(),
-            plan: plan.clone(),
-            amount_paise,
-            currency: currency.clone(),
-            created_at: now.to_rfc3339(),
-        });
+        // Insert order & license inside a transaction for atomicity and data safety
+        let tx = match db.conn.transaction() {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("[webhook] Failed to start database transaction: {e}");
+                return StatusCode::INTERNAL_SERVER_ERROR;
+            }
+        };
 
-        db.licenses.push(License {
-            license_key: license_key.clone(),
-            order_id: order_id.clone(),
-            customer_email: customer_email.clone(),
-            plan: plan.clone(),
-            issued_at: now.to_rfc3339(),
-            valid_until: valid_until.to_rfc3339(),
-        });
+        if let Err(e) = tx.execute(
+            "INSERT INTO orders (order_id, payment_id, customer_email, customer_name, plan, amount_paise, currency, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                &order_id,
+                &payment_id,
+                &customer_email,
+                &customer_name,
+                &plan,
+                amount_paise,
+                &currency,
+                now.to_rfc3339(),
+            ),
+        ) {
+            eprintln!("[webhook] Failed to insert order: {e}");
+            return StatusCode::INTERNAL_SERVER_ERROR;
+        }
+
+        if let Err(e) = tx.execute(
+            "INSERT INTO licenses (license_key, order_id, customer_email, plan, issued_at, valid_until, revoked)
+             VALUES (?, ?, ?, ?, ?, ?, 0)",
+            (
+                &license_key,
+                &order_id,
+                &customer_email,
+                &plan,
+                now.to_rfc3339(),
+                valid_until.to_rfc3339(),
+            ),
+        ) {
+            eprintln!("[webhook] Failed to insert license: {e}");
+            return StatusCode::INTERNAL_SERVER_ERROR;
+        }
+
+        if let Err(e) = tx.commit() {
+            eprintln!("[webhook] Failed to commit database transaction: {e}");
+            return StatusCode::INTERNAL_SERVER_ERROR;
+        }
     }
 
     println!(
@@ -336,6 +498,7 @@ async fn razorpay_webhook(
 
     StatusCode::OK
 }
+
 
 // ─────────────────────────────────────────────
 // HMAC-SHA256 signature verification

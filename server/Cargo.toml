@@ -25,3 +25,7 @@ uuid = { version = "1.8", features = ["v4"] }
 
 # Timestamps for invoices
 chrono = { version = "0.4", features = ["serde"] }
+
+# SQLite database persistence
+rusqlite = { version = "0.31", features = ["bundled"] }
+

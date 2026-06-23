@@ -104,6 +104,10 @@ class PqAuraBindings {
   late final bool Function(Pointer<RatchetState>, Pointer<Utf8>, Pointer<Uint8>) saveAtomic;
   late final Pointer<RatchetState> Function(Pointer<Utf8>, Pointer<Uint8>) loadAtomic;
 
+  late final bool Function() isLicenseVerified;
+  late final void Function(bool) setLicenseVerified;
+
+
   PqAuraBindings() {
     _dylib = _loadLibrary();
     _initBindings();
@@ -191,6 +195,14 @@ class PqAuraBindings {
 
     loadAtomic = _dylib
         .lookup<NativeFunction<Pointer<RatchetState> Function(Pointer<Utf8>, Pointer<Uint8>)>>('pqa_load_atomic')
+        .asFunction();
+
+    isLicenseVerified = _dylib
+        .lookup<NativeFunction<Bool Function()>>('pqa_is_license_verified')
+        .asFunction();
+
+    setLicenseVerified = _dylib
+        .lookup<NativeFunction<Void Function(Bool)>>('pqa_set_license_verified')
         .asFunction();
   }
 }
