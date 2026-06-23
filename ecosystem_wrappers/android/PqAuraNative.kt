@@ -1,4 +1,4 @@
-package com.oasis.app
+package com.pqaura
 
 /**
  * Kotlin JNI Wrapper for the PQ-Aura Hybrid Post-Quantum Double Ratchet library.

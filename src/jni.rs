@@ -30,7 +30,7 @@ struct JniAliceResult {
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_generate_1keypair(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_generate_1keypair(
     env: JNIEnv,
     _class: JClass,
 ) -> jstring {
@@ -50,7 +50,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_generate_1keypair(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_generate_1signing_1keypair(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_generate_1signing_1keypair(
     env: JNIEnv,
     _class: JClass,
 ) -> jstring {
@@ -71,7 +71,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_generate_1signing_
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_create_1bundle(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_create_1bundle(
     env: JNIEnv,
     _class: JClass,
     identity_pk: jbyteArray,
@@ -121,7 +121,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_create_1bundle(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_init_1alice(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_init_1alice(
     mut env: JNIEnv,
     _class: JClass,
     remote_bundle_json: jstring,
@@ -176,7 +176,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_init_1alice(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_respond_1bob(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_respond_1bob(
     mut env: JNIEnv,
     _class: JClass,
     initial_msg_json: jstring,
@@ -247,7 +247,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_respond_1bob(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_encrypt(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_encrypt(
     env: JNIEnv,
     _class: JClass,
     state_ptr: jlong,
@@ -281,7 +281,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_encrypt(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_decrypt(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_decrypt(
     env: JNIEnv,
     _class: JClass,
     state_ptr: jlong,
@@ -324,7 +324,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_decrypt(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_init_1state(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_init_1state(
     env: JNIEnv,
     _class: JClass,
     serialized_state: jbyteArray,
@@ -342,7 +342,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_init_1state(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_load_1atomic(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_load_1atomic(
     mut env: JNIEnv,
     _class: JClass,
     path: jni::sys::jstring,
@@ -374,7 +374,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_load_1atomic(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_save_1atomic(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_save_1atomic(
     mut env: JNIEnv,
     _class: JClass,
     state_ptr: jlong,
@@ -410,7 +410,7 @@ pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_save_1atomic(
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_com_oasis_app_PqAuraNative_free_1state(
+pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_free_1state(
     _env: JNIEnv,
     _class: JClass,
     state_ptr: jlong,
