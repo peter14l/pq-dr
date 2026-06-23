@@ -544,88 +544,88 @@ async fn send_license_email(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PQ-Aura Commercial License</title>
 </head>
-<body style="margin:0;padding:0;background:#0f0f12;font-family:'Segoe UI',Arial,sans-serif;color:#e2e8f0;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f12;padding:40px 0;">
+<body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;color:#0f172a;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;padding:40px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#1a1a2e;border-radius:16px;overflow:hidden;border:1px solid rgba(99,102,241,0.3);">
+      <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05),0 8px 10px -6px rgba(0,0,0,0.05);border:1px solid #e2e8f0;">
 
         <!-- Header -->
-        <tr><td style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:32px 40px;text-align:center;">
-          <h1 style="margin:0;color:#fff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">PQ-Aura</h1>
-          <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Post-Quantum Secure Messaging SDK</p>
+        <tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:32px 40px;text-align:center;">
+          <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">PQ-Aura</h1>
+          <p style="margin:8px 0 0;color:rgba(255,255,255,0.9);font-size:14px;">Post-Quantum Secure Messaging SDK</p>
         </td></tr>
 
         <!-- Success Banner -->
         <tr><td style="padding:32px 40px 0;">
-          <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:20px;text-align:center;">
-            <div style="font-size:32px;margin-bottom:8px;">&#x2705;</div>
-            <h2 style="margin:0;color:#10b981;font-size:20px;">Payment Confirmed!</h2>
-            <p style="margin:8px 0 0;color:#94a3b8;font-size:14px;">Your commercial license has been issued.</p>
+          <div style="background-color:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:20px;text-align:center;">
+            <div style="font-size:32px;margin-bottom:8px;">✅</div>
+            <h2 style="margin:0;color:#047857;font-size:20px;">Payment Confirmed!</h2>
+            <p style="margin:8px 0 0;color:#065f46;font-size:14px;">Your commercial license has been successfully issued.</p>
           </div>
         </td></tr>
 
         <!-- Greeting -->
         <tr><td style="padding:28px 40px 0;">
-          <p style="margin:0;font-size:16px;color:#e2e8f0;">Hi <strong style="color:#a5b4fc;">{customer_name}</strong>,</p>
-          <p style="margin:12px 0 0;font-size:15px;color:#94a3b8;line-height:1.6;">
-            Thank you for purchasing the <strong style="color:#e2e8f0;">PQ-Aura {plan}</strong>.
-            Your license key is below — keep it safe and do not share it publicly.
+          <p style="margin:0;font-size:16px;color:#0f172a;">Hi <strong>{customer_name}</strong>,</p>
+          <p style="margin:12px 0 0;font-size:15px;color:#475569;line-height:1.6;">
+            Thank you for purchasing the <strong>PQ-Aura {plan}</strong>.
+            Your license key is below. Please store it securely and do not share it publicly.
           </p>
         </td></tr>
 
         <!-- License Key Box -->
         <tr><td style="padding:24px 40px 0;">
-          <div style="background:#0f0f12;border:2px solid #6366f1;border-radius:12px;padding:24px;text-align:center;">
-            <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;font-weight:600;">Your License Key</p>
-            <code style="font-size:18px;font-weight:700;color:#a5b4fc;letter-spacing:1px;word-break:break-all;">{license_key}</code>
+          <div style="background-color:#f1f5f9;border:2px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;">
+            <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#4f46e5;font-weight:600;">Your License Key</p>
+            <code style="font-size:18px;font-weight:700;color:#4f46e5;letter-spacing:1px;word-break:break-all;font-family:monospace;">{license_key}</code>
             <p style="margin:12px 0 0;font-size:12px;color:#64748b;">Valid from {issued_date} to {valid_until}</p>
           </div>
         </td></tr>
 
         <!-- Invoice Table -->
         <tr><td style="padding:28px 40px 0;">
-          <h3 style="margin:0 0 16px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;font-weight:600;">Invoice Details</h3>
+          <h3 style="margin:0 0 16px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#4f46e5;font-weight:600;">Invoice Details</h3>
           <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:12px 0;font-size:14px;color:#64748b;">Invoice / Order ID</td>
-              <td style="padding:12px 0;font-size:14px;color:#e2e8f0;text-align:right;font-family:monospace;">{order_id}</td>
+              <td style="padding:12px 0;font-size:14px;color:#0f172a;text-align:right;font-family:monospace;">{order_id}</td>
             </tr>
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:12px 0;font-size:14px;color:#64748b;">Razorpay Payment ID</td>
-              <td style="padding:12px 0;font-size:14px;color:#e2e8f0;text-align:right;font-family:monospace;">{payment_id}</td>
+              <td style="padding:12px 0;font-size:14px;color:#0f172a;text-align:right;font-family:monospace;">{payment_id}</td>
             </tr>
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:12px 0;font-size:14px;color:#64748b;">Product</td>
-              <td style="padding:12px 0;font-size:14px;color:#e2e8f0;text-align:right;">{plan}</td>
+              <td style="padding:12px 0;font-size:14px;color:#0f172a;text-align:right;">{plan}</td>
             </tr>
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:12px 0;font-size:14px;color:#64748b;">Billing Period</td>
-              <td style="padding:12px 0;font-size:14px;color:#e2e8f0;text-align:right;">Monthly</td>
+              <td style="padding:12px 0;font-size:14px;color:#0f172a;text-align:right;">Monthly</td>
             </tr>
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:12px 0;font-size:14px;color:#64748b;">Issue Date</td>
-              <td style="padding:12px 0;font-size:14px;color:#e2e8f0;text-align:right;">{issued_date}</td>
+              <td style="padding:12px 0;font-size:14px;color:#0f172a;text-align:right;">{issued_date}</td>
             </tr>
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <tr style="border-bottom:1px solid #f1f5f9;">
               <td style="padding:12px 0;font-size:14px;color:#64748b;">Valid Until</td>
-              <td style="padding:12px 0;font-size:14px;color:#e2e8f0;text-align:right;">{valid_until}</td>
+              <td style="padding:12px 0;font-size:14px;color:#0f172a;text-align:right;">{valid_until}</td>
             </tr>
             <tr>
-              <td style="padding:16px 0 0;font-size:16px;font-weight:700;color:#e2e8f0;">Amount Paid</td>
-              <td style="padding:16px 0 0;font-size:18px;font-weight:700;color:#a5b4fc;text-align:right;">&#x20B9;{amount_inr} {currency}</td>
+              <td style="padding:16px 0 0;font-size:16px;font-weight:700;color:#0f172a;">Amount Paid</td>
+              <td style="padding:16px 0 0;font-size:18px;font-weight:700;color:#4f46e5;text-align:right;">&#x20B9;{amount_inr} {currency}</td>
             </tr>
           </table>
         </td></tr>
 
         <!-- Usage Instructions -->
         <tr><td style="padding:28px 40px 0;">
-          <div style="background:#0f0f12;border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.06);">
-            <h3 style="margin:0 0 14px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;font-weight:600;">How to Use Your License</h3>
-            <ol style="margin:0;padding-left:20px;color:#94a3b8;font-size:14px;line-height:2;">
-              <li>Add <code style="color:#a5b4fc;background:rgba(99,102,241,0.1);padding:1px 6px;border-radius:4px;">pq-aura</code> to your <code style="color:#a5b4fc;background:rgba(99,102,241,0.1);padding:1px 6px;border-radius:4px;">Cargo.toml</code> dependencies.</li>
-              <li>Store your license key as an environment variable: <code style="color:#a5b4fc;background:rgba(99,102,241,0.1);padding:1px 6px;border-radius:4px;">PQ_AURA_LICENSE_KEY</code>.</li>
-              <li>You may use this license in <strong style="color:#e2e8f0;">one commercial product</strong>. Contact us for multi-seat/enterprise.</li>
-              <li>Renew before <strong style="color:#e2e8f0;">{valid_until}</strong> to avoid service interruption.</li>
+          <div style="background-color:#f8fafc;border-radius:12px;padding:20px;border:1px solid #e2e8f0;">
+            <h3 style="margin:0 0 14px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#4f46e5;font-weight:600;">How to Use Your License</h3>
+            <ol style="margin:0;padding-left:20px;color:#475569;font-size:14px;line-height:2;">
+              <li>Add <code style="color:#4f46e5;background-color:#eff6ff;padding:2px 6px;border-radius:4px;font-family:monospace;">pq-aura</code> to your <code style="color:#4f46e5;background-color:#eff6ff;padding:2px 6px;border-radius:4px;font-family:monospace;">Cargo.toml</code> dependencies.</li>
+              <li>Store your license key as an environment variable: <code style="color:#4f46e5;background-color:#eff6ff;padding:2px 6px;border-radius:4px;font-family:monospace;">PQ_AURA_LICENSE_KEY</code>.</li>
+              <li>You may use this license in <strong style="color:#0f172a;">one commercial product</strong>. Contact us for multi-seat/enterprise support.</li>
+              <li>Renew before <strong style="color:#0f172a;">{valid_until}</strong> to avoid service interruption.</li>
             </ol>
           </div>
         </td></tr>
