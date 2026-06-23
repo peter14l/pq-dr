@@ -1,0 +1,13 @@
+name: pq_aura_flutter
+description: A Hybrid Post-Quantum Double Ratchet (PQ-Aura) Flutter plugin using native FFI.
+version: 0.1.0
+repository: https://github.com/peter14l/pq-dr
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^2.1.0

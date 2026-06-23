@@ -1,0 +1,62 @@
+error[E0282]: type annotations needed
+   --> src/crypto.rs:169:46
+    |
+169 |     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+    |                                              ^^^^^^
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+169 -     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+169 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key_bytes).into());
+    |
+
+error[E0282]: type annotations needed
+   --> src/crypto.rs:190:46
+    |
+190 |     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+    |                                              ^^^^^^
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+190 -     let cipher = Aes256GcmSiv::new(key_bytes.as_ref().into());
+190 +     let cipher = Aes256GcmSiv::new(<[u8; 32] as std::convert::AsRef<T>>::as_ref(&key_bytes).into());
+    |
+
+error[E0382]: borrow of moved value: `rng`
+  --> src/crypto.rs:90:46
+   |
+81 |     rng: &mut R,
+   |     --- move occurs because `rng` has type `&mut R`, which does not implement the `Copy` trait
+82 | ) -> (HybridPublicKey, HybridSecretKey) {
+83 |     let x_secret = XStaticSecret::random_from_rng(rng);
+   |                                                   --- value moved here
+...
+90 |     let (ml_sk, ml_pk) = MlKem1024::generate(rng);
+   |                                              ^^^ value borrowed here after move
+   |
+help: consider creating a fresh reborrow of `rng` here
+   |
+83 |     let x_secret = XStaticSecret::random_from_rng(&mut *rng);
+   |                                                   ++++++
+
+error[E0382]: borrow of moved value: `rng`
+   --> src/crypto.rs:125:61
+    |
+117 |     rng: &mut R,
+    |     --- move occurs because `rng` has type `&mut R`, which does not implement the `Copy` trait
+...
+120 |     let ephemeral_x_secret = XStaticSecret::random_from_rng(rng);
+    |                                                             --- value moved here
+...
+125 |     let (ml_shared, ml_ciphertext) = pk.quantum.encapsulate(rng).expect("Encapsulation failed");
+    |                                                             ^^^ value borrowed here after move
+    |
+help: consider creating a fresh reborrow of `rng` here
+    |
+120 |     let ephemeral_x_secret = XStaticSecret::random_from_rng(&mut *rng);
+    |                                                             ++++++
+
+Some errors have detailed explanations: E0282, E0382.
+For more information about an error, try `rustc --explain E0282`.
+error: could not compile `pq-aura` (lib) due to 4 previous errors
+Error: Process completed with exit code 101.

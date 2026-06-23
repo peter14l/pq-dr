@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | PQ-Aura</title>
+    <meta name="description" content="Terms of Service for PQ-Aura SDK — commercial licensing, usage restrictions, and legal obligations.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .legal-page {
+            min-height: 100vh;
+            padding: 120px 0 80px;
+        }
+        .legal-container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .legal-header {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .legal-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 20px;
+            padding: 5px 14px;
+            margin-bottom: 20px;
+        }
+        .legal-header h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        .legal-meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .legal-body h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 48px 0 16px;
+            padding-left: 16px;
+            border-left: 3px solid var(--accent-primary);
+        }
+        .legal-body h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 28px 0 10px;
+        }
+        .legal-body p {
+            color: var(--text-secondary);
+            line-height: 1.85;
+            margin-bottom: 16px;
+            font-size: 0.97rem;
+        }
+        .legal-body ul {
+            color: var(--text-secondary);
+            line-height: 1.85;
+            margin: 0 0 16px 20px;
+            font-size: 0.97rem;
+        }
+        .legal-body ul li {
+            margin-bottom: 8px;
+        }
+        .legal-body a {
+            color: var(--accent-primary);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .legal-highlight {
+            background: rgba(99,102,241,0.07);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+        .legal-highlight p {
+            margin: 0;
+            font-size: 0.93rem;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            margin-bottom: 40px;
+        }
+        .back-link:hover { color: var(--accent-primary); }
+        .back-link::before { content: "←"; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo" id="nav-logo">
+                <img src="assets/logo.jpg" alt="PQ-Aura Logo" class="logo-img">
+                <span class="logo-text">PQ-AURA</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html#features" class="nav-link">Technology</a>
+                <a href="index.html#pricing" class="nav-link">Pricing</a>
+                <a href="privacy.html" class="nav-link">Privacy</a>
+            </nav>
+            <div class="nav-cta">
+                <a href="index.html#pricing" class="btn btn-primary btn-sm" id="btn-nav-buy">Buy License</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="legal-page">
+        <div class="legal-container">
+            <a href="index.html" class="back-link">Back to Home</a>
+
+            <div class="legal-header">
+                <div class="legal-badge">Legal</div>
+                <h1>Terms of Service</h1>
+                <p class="legal-meta">Effective Date: <strong>22 June 2026</strong> &nbsp;·&nbsp; Last Updated: <strong>22 June 2026</strong></p>
+            </div>
+
+            <div class="legal-body">
+                <div class="legal-highlight">
+                    <p>Please read these Terms carefully before purchasing or using the PQ-Aura SDK. By accessing the software, website, or purchasing a license, you agree to be bound by these Terms.</p>
+                </div>
+
+                <h2>1. Parties</h2>
+                <p>These Terms of Service ("Terms") constitute a legally binding agreement between <strong>Shreyas Sengupta</strong> ("Developer", "we", "us", "our"), the sole developer and copyright holder of PQ-Aura, and you ("User", "Licensee", "you") — any individual or legal entity that accesses, downloads, or uses the PQ-Aura software or website located at <a href="https://peter14l.github.io/pq-dr/">peter14l.github.io/pq-dr</a>.</p>
+
+                <h2>2. Description of Service</h2>
+                <p>PQ-Aura is a cryptographic software library implementing a Hybrid Post-Quantum Double Ratchet protocol. The SDK is offered in two licensing tiers:</p>
+                <ul>
+                    <li><strong>Open-Source (Free):</strong> Available under the GNU General Public License v3.0 (GPL-3.0). Use is permitted for open-source projects that share source code under compatible terms.</li>
+                    <li><strong>Commercial License:</strong> A paid, proprietary license that permits integration into closed-source, proprietary, or commercial applications without GPL copyleft obligations.</li>
+                </ul>
+
+                <h2>3. Commercial License Terms</h2>
+                <h3>3.1 Grant of License</h3>
+                <p>Upon successful payment of the applicable license fee, we grant you a non-exclusive, non-transferable, worldwide license to integrate and use the PQ-Aura SDK in your proprietary application(s) for the duration of your subscription period.</p>
+
+                <h3>3.2 License Restrictions</h3>
+                <p>You may <strong>not</strong>:</p>
+                <ul>
+                    <li>Sublicense, sell, resell, or distribute the PQ-Aura SDK itself as a standalone product.</li>
+                    <li>Claim ownership or authorship of the PQ-Aura cryptographic algorithms or core library code.</li>
+                    <li>Use the license for more applications or entities than the purchased tier covers without upgrading to an Enterprise plan.</li>
+                    <li>Reverse-engineer the SDK beyond what is permitted by applicable law.</li>
+                </ul>
+
+                <h3>3.3 Attribution</h3>
+                <p>Commercial licensees are encouraged (but not required) to include a notice such as "Secured by PQ-Aura" in their application's documentation or about page.</p>
+
+                <h3>3.4 Subscription & Renewals</h3>
+                <p>Commercial licenses are billed monthly. Your license remains valid as long as your subscription is active. If you cancel, you must cease using the SDK in any new applications but may continue using it in versions already shipped during the active subscription period.</p>
+
+                <h2>4. Payments & Refunds</h2>
+                <p>All payments are processed by <strong>Razorpay</strong>. By making a purchase, you also agree to Razorpay's <a href="https://razorpay.com/terms/" target="_blank" rel="noopener">Terms of Service</a>.</p>
+                <ul>
+                    <li><strong>Currency:</strong> All prices are displayed in INR (Indian Rupees). International card payments may be subject to foreign transaction fees by your bank.</li>
+                    <li><strong>Refunds:</strong> We offer a <strong>7-day refund</strong> policy from the date of purchase if the SDK does not compile or integrate as documented. Refund requests must be sent to <a href="mailto:support@pqaura.dev">support@pqaura.dev</a> with a description of the issue.</li>
+                    <li><strong>Disputes:</strong> In the event of a payment dispute, please contact us before initiating a chargeback. We will work to resolve the issue promptly.</li>
+                </ul>
+
+                <h2>5. Open-Source (GPL-3.0) Usage</h2>
+                <p>If you use PQ-Aura under the GPL-3.0 license:</p>
+                <ul>
+                    <li>Your application's source code must be made available under the GPL-3.0 or a compatible license.</li>
+                    <li>You must prominently display the GPL-3.0 license notice in your application and documentation.</li>
+                    <li>You may not remove or obscure any copyright notices from the source code.</li>
+                </ul>
+                <p>Failure to comply with GPL-3.0 obligations automatically terminates your right to use the library and may expose you to copyright infringement claims.</p>
+
+                <h2>6. Disclaimer of Warranties</h2>
+                <p>THE PQ-AURA SDK IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.</p>
+                <p>While PQ-Aura implements standardized NIST cryptographic algorithms (ML-KEM-1024, FIPS 203), we do not warrant that the software is free from all security vulnerabilities, or that it is suitable for any specific regulatory compliance requirement (e.g. HIPAA, PCI-DSS, GDPR) without independent security review.</p>
+
+                <h2>7. Limitation of Liability</h2>
+                <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE DEVELOPER BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES — INCLUDING LOSS OF PROFITS, DATA, OR BUSINESS — ARISING FROM YOUR USE OF OR INABILITY TO USE THE SDK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+                <p>Our total aggregate liability shall not exceed the amount you paid for the license in the 3 months preceding the event giving rise to liability.</p>
+
+                <h2>8. Indemnification</h2>
+                <p>You agree to indemnify, defend, and hold harmless the Developer from any claims, damages, losses, liabilities, and expenses (including attorneys' fees) arising from: (a) your use of the SDK; (b) your violation of these Terms; or (c) your infringement of any third-party rights.</p>
+
+                <h2>9. Governing Law</h2>
+                <p>These Terms shall be governed by and construed in accordance with the laws of <strong>India</strong>. Any disputes arising under these Terms shall be subject to the exclusive jurisdiction of courts in <strong>West Bengal, India</strong>.</p>
+
+                <h2>10. Changes to Terms</h2>
+                <p>We reserve the right to modify these Terms at any time. We will notify active commercial licensees by email at least 14 days before material changes take effect. Continued use of the SDK after the effective date constitutes acceptance of the revised Terms.</p>
+
+                <h2>11. Contact</h2>
+                <p>For licensing inquiries, refund requests, or legal notices, please contact:</p>
+                <ul>
+                    <li><strong>Email:</strong> <a href="mailto:support@pqaura.dev">support@pqaura.dev</a></li>
+                    <li><strong>GitHub:</strong> <a href="https://github.com/peter14l/pq-dr" target="_blank" rel="noopener">github.com/peter14l/pq-dr</a></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <a href="index.html" class="logo">
+                    <img src="assets/logo.jpg" alt="PQ-Aura Logo" class="logo-img">
+                    <span class="logo-text">PQ-AURA</span>
+                </a>
+                <p>NIST FIPS 203 Hybrid Post-Quantum End-to-End Encryption SDK.</p>
+            </div>
+            <div class="footer-right">
+                <p>&copy; 2026 PQ-Aura. All rights reserved. Created by Shreyas Sengupta.</p>
+                <p style="margin-top:8px;">
+                    <a href="terms.html" style="color:var(--text-muted);text-decoration:none;margin-right:16px;">Terms of Service</a>
+                    <a href="privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
