@@ -200,8 +200,8 @@ async fn fetch_messages(
 // /config — serves Razorpay public key to frontend
 // ─────────────────────────────────────────────
 async fn get_config() -> Json<ConfigResponse> {
-    let razorpay_key_id = std::env::var("RAZORPAY_KEY_ID")
-        .unwrap_or_else(|_| "rzp_test_placeholder".to_string());
+    let razorpay_key_id =
+        std::env::var("RAZORPAY_KEY_ID").unwrap_or_else(|_| "rzp_test_placeholder".to_string());
     Json(ConfigResponse { razorpay_key_id })
 }
 
@@ -250,22 +250,28 @@ async fn razorpay_webhook(
     // (tokio::spawn requires 'static captures)
     let entity = &webhook.payload.payment.entity;
 
-    let payment_id     = entity.id.clone();
-    let amount_paise   = entity.amount;
-    let currency       = entity.currency.clone();
-    let customer_email = entity.email.clone()
+    let payment_id = entity.id.clone();
+    let amount_paise = entity.amount;
+    let currency = entity.currency.clone();
+    let customer_email = entity
+        .email
+        .clone()
         .unwrap_or_else(|| "unknown@example.com".to_string());
-    let customer_name  = entity.notes.as_ref()
+    let customer_name = entity
+        .notes
+        .as_ref()
         .and_then(|n| n.customer_name.clone())
         .unwrap_or_else(|| "Valued Customer".to_string());
-    let plan = entity.notes.as_ref()
+    let plan = entity
+        .notes
+        .as_ref()
         .and_then(|n| n.product.clone())
         .unwrap_or_else(|| "Commercial SDK License".to_string());
 
     // ── Step 4: Generate order + license records ──────────────────────────
-    let now         = Utc::now();
+    let now = Utc::now();
     let valid_until = now + chrono::Duration::days(30);
-    let order_id    = Uuid::new_v4().to_string();
+    let order_id = Uuid::new_v4().to_string();
     let license_key = format!("PQAURA-{}", Uuid::new_v4().to_string().to_uppercase());
 
     {
@@ -278,23 +284,23 @@ async fn razorpay_webhook(
         }
 
         db.orders.push(Order {
-            order_id:       order_id.clone(),
-            payment_id:     payment_id.clone(),
+            order_id: order_id.clone(),
+            payment_id: payment_id.clone(),
             customer_email: customer_email.clone(),
-            customer_name:  customer_name.clone(),
-            plan:           plan.clone(),
+            customer_name: customer_name.clone(),
+            plan: plan.clone(),
             amount_paise,
-            currency:       currency.clone(),
-            created_at:     now.to_rfc3339(),
+            currency: currency.clone(),
+            created_at: now.to_rfc3339(),
         });
 
         db.licenses.push(License {
-            license_key:    license_key.clone(),
-            order_id:       order_id.clone(),
+            license_key: license_key.clone(),
+            order_id: order_id.clone(),
             customer_email: customer_email.clone(),
-            plan:           plan.clone(),
-            issued_at:      now.to_rfc3339(),
-            valid_until:    valid_until.to_rfc3339(),
+            plan: plan.clone(),
+            issued_at: now.to_rfc3339(),
+            valid_until: valid_until.to_rfc3339(),
         });
     }
 
@@ -304,7 +310,7 @@ async fn razorpay_webhook(
     );
 
     // ── Step 5: Send invoice + license email (non-blocking) ───────────────
-    let amount_inr      = amount_paise / 100;
+    let amount_inr = amount_paise / 100;
     let issued_date_str = now.format("%d %B %Y").to_string();
     let valid_until_str = valid_until.format("%d %B %Y").to_string();
 
@@ -361,11 +367,11 @@ async fn send_license_email(
     issued_date: &str,
     valid_until: &str,
 ) -> Result<(), String> {
-    let resend_api_key = std::env::var("RESEND_API_KEY")
-        .map_err(|_| "RESEND_API_KEY not set".to_string())?;
+    let resend_api_key =
+        std::env::var("RESEND_API_KEY").map_err(|_| "RESEND_API_KEY not set".to_string())?;
 
-    let from_email = std::env::var("FROM_EMAIL")
-        .unwrap_or_else(|_| "support@pqaura.dev".to_string());
+    let from_email =
+        std::env::var("FROM_EMAIL").unwrap_or_else(|_| "support@pqaura.dev".to_string());
 
     let html_body = format!(
         r#"<!DOCTYPE html>
@@ -485,14 +491,14 @@ async fn send_license_email(
 </body>
 </html>"#,
         customer_name = customer_name,
-        license_key   = license_key,
-        order_id      = order_id,
-        payment_id    = payment_id,
-        plan          = plan,
-        amount_inr    = amount_inr,
-        currency      = currency,
-        issued_date   = issued_date,
-        valid_until   = valid_until,
+        license_key = license_key,
+        order_id = order_id,
+        payment_id = payment_id,
+        plan = plan,
+        amount_inr = amount_inr,
+        currency = currency,
+        issued_date = issued_date,
+        valid_until = valid_until,
     );
 
     let client = reqwest::Client::new();
@@ -516,7 +522,7 @@ async fn send_license_email(
         Ok(())
     } else {
         let status = response.status();
-        let text   = response.text().await.unwrap_or_default();
+        let text = response.text().await.unwrap_or_default();
         Err(format!("Resend API error {status}: {text}"))
     }
 }
