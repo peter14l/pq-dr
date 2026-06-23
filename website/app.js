@@ -17,15 +17,15 @@ function injectPaymentModal() {
         <div class="psm-card" id="psm-card" role="dialog" aria-modal="true" aria-labelledby="psm-title">
             <div class="psm-icon">✅</div>
             <h2 class="psm-title" id="psm-title">Payment Successful!</h2>
-            <p class="psm-subtitle">Thank you for purchasing the PQ-Aura Commercial SDK License.</p>
+            <p class="psm-subtitle" id="psm-subtitle">Thank you for purchasing the PQ-Aura SDK License.</p>
             <div class="psm-detail-box">
                 <div class="psm-row">
                     <span class="psm-label">Product</span>
-                    <span class="psm-value">Commercial SDK License</span>
+                    <span class="psm-value" id="psm-product">—</span>
                 </div>
                 <div class="psm-row">
                     <span class="psm-label">Amount</span>
-                    <span class="psm-value">₹16,500 / month</span>
+                    <span class="psm-value" id="psm-amount">—</span>
                 </div>
                 <div class="psm-row">
                     <span class="psm-label">Payment ID</span>
@@ -51,8 +51,13 @@ function injectPaymentModal() {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePaymentModal(); });
 }
 
-function openPaymentModal(paymentId) {
+function openPaymentModal(paymentId, productName, amountPaise) {
+    const amountVal = amountPaise === "399900" ? "₹3,999 / month" : "₹16,500 / month";
     document.getElementById('psm-payment-id').textContent = paymentId || '—';
+    document.getElementById('psm-product').textContent = productName || 'Commercial SDK License';
+    document.getElementById('psm-amount').textContent = amountVal;
+    document.getElementById('psm-subtitle').textContent = `Thank you for purchasing the PQ-Aura ${productName || 'SDK License'}.`;
+
     const modal = document.getElementById('payment-success-modal');
     modal.classList.add('visible');
     document.body.style.overflow = 'hidden';
@@ -84,46 +89,21 @@ async function initCheckout() {
 
         // Initialize Razorpay
         loadScript('https://checkout.razorpay.com/v1/checkout.js', () => {
-            const razorpayBtn = document.getElementById('btn-pricing-commercial');
-            if (razorpayBtn) {
-                razorpayBtn.addEventListener('click', (e) => {
+            // Setup Indie Checkout
+            const indieBtn = document.getElementById('btn-pricing-indie');
+            if (indieBtn) {
+                indieBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const options = {
-                        "key": config.razorpay_key_id,
-                        "amount": "1650000", // 16500 INR in paise
-                        "currency": "INR",
-                        "name": "PQ-Aura",
-                        "description": "Commercial SDK License — Monthly",
-                        "image": "assets/logo.jpg",
-                        "handler": function (res) {
-                            // Razorpay calls this after a successful payment capture.
-                            // The server-side webhook (payment.captured) is the authoritative
-                            // trigger for license issuance — this just shows the UI confirmation.
-                            openPaymentModal(res.razorpay_payment_id);
-                        },
-                        "prefill": {
-                            "name": "",
-                            "email": "",
-                            "contact": ""
-                        },
-                        "notes": {
-                            // These notes are forwarded to the server webhook payload,
-                            // letting the backend embed customer_name in the license email.
-                            "product": "Commercial SDK License",
-                            "customer_name": "" // Razorpay auto-fills this from prefill.name
-                        },
-                        "theme": {
-                            "color": "#6366f1"
-                        }
-                    };
-                    const rzp = new window.Razorpay(options);
+                    openRazorpayCheckout(config.razorpay_key_id, "399900", "Startup & Indie SDK License", "Startup & Indie SDK License — Monthly");
+                });
+            }
 
-                    // Sync customer_name from prefill into notes before opening
-                    rzp.on('ready', function () {
-                        options.notes.customer_name = options.prefill.name || 'Valued Customer';
-                    });
-
-                    rzp.open();
+            // Setup Commercial Checkout
+            const commercialBtn = document.getElementById('btn-pricing-commercial');
+            if (commercialBtn) {
+                commercialBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openRazorpayCheckout(config.razorpay_key_id, "1650000", "Commercial SDK License", "Commercial SDK License — Monthly");
                 });
             }
         });
@@ -131,6 +111,40 @@ async function initCheckout() {
     } catch (err) {
         console.error('Failed to initialize checkout:', err);
     }
+}
+
+function openRazorpayCheckout(key, amount, productName, description) {
+    const options = {
+        "key": key,
+        "amount": amount,
+        "currency": "INR",
+        "name": "PQ-Aura",
+        "description": description,
+        "image": "assets/logo.jpg",
+        "handler": function (res) {
+            // Success Modal pop-up
+            openPaymentModal(res.razorpay_payment_id, productName, amount);
+        },
+        "prefill": {
+            "name": "",
+            "email": "",
+            "contact": ""
+        },
+        "notes": {
+            "product": productName,
+            "customer_name": ""
+        },
+        "theme": {
+            "color": "#6366f1"
+        }
+    };
+    const rzp = new window.Razorpay(options);
+
+    rzp.on('ready', function () {
+        options.notes.customer_name = options.prefill.name || 'Valued Customer';
+    });
+
+    rzp.open();
 }
 
 function loadScript(src, callback) {
