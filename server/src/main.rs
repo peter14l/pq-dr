@@ -668,7 +668,7 @@ async fn send_license_email(
     let req_body = serde_json::json!({
         "from": format!("PQ-Aura <{}>", from_email),
         "to": [to_email],
-        "subject": format!("Your PQ-Aura Commercial License — Order {}", order_id),
+        "subject": format!("Your PQ-Aura {} — Order {}", plan, order_id),
         "html": html_body,
     });
 
