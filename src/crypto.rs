@@ -444,7 +444,7 @@ pub mod serde_quantum_secretkey {
 
 use ed25519_dalek::{Signer as ClassicSigner, Verifier as ClassicVerifier};
 use ml_dsa::signature::{Signer as QuantumSigner, Verifier as QuantumVerifier};
-use ml_dsa::{Keypair, SignatureEncoding};
+use ml_dsa::Keypair;
 
 /// Hybrid Signing Key containing both Ed25519 and ML-DSA-65 components.
 pub struct HybridSigningKey {
@@ -582,15 +582,15 @@ impl HybridSignature {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
         bytes.extend_from_slice(&self.classic.to_bytes());
-        bytes.extend_from_slice(self.quantum.to_bytes().as_slice());
+        bytes.extend_from_slice(self.quantum.encode().as_slice());
         bytes
     }
 
     /// Deserializes the hybrid signature from bytes.
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, &'static str> {
         // Ed25519 signature: 64 bytes.
-        // ML-DSA-65 signature: 3300 bytes.
-        if bytes.len() != 64 + 3300 {
+        // ML-DSA-65 signature: 3309 bytes.
+        if bytes.len() != 64 + 3309 {
             return Err("Invalid hybrid signature length");
         }
         let (classic_bytes, quantum_bytes) = bytes.split_at(64);

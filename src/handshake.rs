@@ -202,12 +202,11 @@ impl HandshakeEngine {
         let root_key = SecretKeyMaterial(hasher.finalize().into());
 
         // 3. Initialize Bob's Ratchet State
-        // Bob uses Alice's Identity PK as the remote PK initially.
-        // He generates a NEW DH keypair for the ratchet.
-        let mut rng = rand::thread_rng();
-        let (dr_pk, dr_sk) = crypto::generate_hybrid_keypair(&mut rng);
-
-        let mut state = RatchetState::new_bob(root_key.clone(), dr_pk, dr_sk);
+        // Bob starts with his identity keypair so he can decapsulate Alice's first ratchet message,
+        // which Alice encapsulates against Bob's identity public key.
+        let bob_local_sk = HybridSecretKey::from_bytes(&bob_identity_sk.to_bytes())?;
+        let mut state =
+            RatchetState::new_bob(root_key.clone(), _bob_identity_pk.clone(), bob_local_sk);
         state.remote_dh_pk = Some(message.alice_identity_pk.clone());
 
         Ok((state, root_key))
