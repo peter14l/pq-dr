@@ -1,5 +1,4 @@
 use crate::crypto::{HybridPublicKey, HybridSecretKey, SecretKeyMaterial};
-use rand_core::RngCore;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use zeroize::{Zeroize, ZeroizeOnDrop};
