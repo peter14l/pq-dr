@@ -5,7 +5,7 @@ use crate::handshake::{HandshakeEngine, InitialMessage, PreKeyBundle};
 use crate::ratchet::{Message, RatchetEngine};
 use crate::state::RatchetState;
 use jni::objects::{JByteArray, JClass, JString};
-use jni::sys::{jbyteArray, jlong, jstring, jboolean, JNI_TRUE};
+use jni::sys::{jboolean, jbyteArray, jlong, jstring, JNI_TRUE};
 use jni::JNIEnv;
 use rand::thread_rng;
 use serde::Serialize;
@@ -159,10 +159,18 @@ pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_init_1alice(
     };
 
     let mut rng = thread_rng();
-    match HandshakeEngine::initiate_alice(&remote_bundle, &local_identity_pk, &local_identity_sk, &mut rng) {
+    match HandshakeEngine::initiate_alice(
+        &remote_bundle,
+        &local_identity_pk,
+        &local_identity_sk,
+        &mut rng,
+    ) {
         Ok((state, initial_message, _root_key)) => {
             let state_ptr = Box::into_raw(Box::new(state)) as jlong;
-            let result = JniAliceResult { state_ptr, initial_message };
+            let result = JniAliceResult {
+                state_ptr,
+                initial_message,
+            };
             match serde_json::to_string(&result) {
                 Ok(json) => match env.new_string(json) {
                     Ok(js) => js.into_raw(),
@@ -240,7 +248,13 @@ pub unsafe extern "system" fn Java_com_pqaura_PqAuraNative_respond_1bob(
         None
     };
 
-    match HandshakeEngine::respond_bob(&initial_msg, &local_identity_pk, &local_identity_sk, &local_signed_sk, ot_sk.as_ref()) {
+    match HandshakeEngine::respond_bob(
+        &initial_msg,
+        &local_identity_pk,
+        &local_identity_sk,
+        &local_signed_sk,
+        ot_sk.as_ref(),
+    ) {
         Ok((state, _root_key)) => Box::into_raw(Box::new(state)) as jlong,
         Err(_) => 0,
     }

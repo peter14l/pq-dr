@@ -9,17 +9,22 @@
 //! and quantum exchanges is merged using BLAKE3 as a Key Derivation Function (KDF).
 
 pub mod crypto;
-pub mod ffi;
 pub mod handshake;
-pub mod jni;
 pub mod ratchet;
 pub mod state;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod ffi;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod jni;
+
+#[cfg(target_arch = "wasm32")]
 pub mod wasm;
 
 pub use crypto::{
     combine_secrets, generate_hybrid_keypair, hybrid_decapsulate, hybrid_encapsulate,
-    HybridPublicKey, HybridSecretKey, SecretKeyMaterial,
-    HybridSigningKey, HybridVerifyingKey, HybridSignature,
+    HybridPublicKey, HybridSecretKey, HybridSignature, HybridSigningKey, HybridVerifyingKey,
+    SecretKeyMaterial,
 };
 pub use ratchet::{Header, Message, RatchetEngine};
 pub use state::RatchetState;

@@ -78,12 +78,23 @@ pub unsafe extern "C" fn pqa_encrypt(
     ad_ptr: *const u8,
     ad_len: usize,
 ) -> *mut FfiMessage {
-    if state_ptr.is_null() || plaintext_ptr.is_null() || ad_ptr.is_null() {
+    if state_ptr.is_null()
+        || (plaintext_len > 0 && plaintext_ptr.is_null())
+        || (ad_len > 0 && ad_ptr.is_null())
+    {
         return std::ptr::null_mut();
     }
     let state = &mut *state_ptr;
-    let plaintext = std::slice::from_raw_parts(plaintext_ptr, plaintext_len);
-    let ad = std::slice::from_raw_parts(ad_ptr, ad_len);
+    let plaintext = if plaintext_len > 0 && !plaintext_ptr.is_null() {
+        std::slice::from_raw_parts(plaintext_ptr, plaintext_len)
+    } else {
+        &[]
+    };
+    let ad = if ad_len > 0 && !ad_ptr.is_null() {
+        std::slice::from_raw_parts(ad_ptr, ad_len)
+    } else {
+        &[]
+    };
     let mut rng = thread_rng();
 
     let msg = RatchetEngine::encrypt(state, plaintext, ad, &mut rng);
@@ -119,15 +130,19 @@ pub unsafe extern "C" fn pqa_decrypt(
     if state_ptr.is_null()
         || header_ptr.is_null()
         || payload_ptr.is_null()
-        || ad_ptr.is_null()
         || out_len.is_null()
+        || (ad_len > 0 && ad_ptr.is_null())
     {
         return std::ptr::null_mut();
     }
     let state = &mut *state_ptr;
     let header_ciphertext = std::slice::from_raw_parts(header_ptr, header_len);
     let payload_ciphertext = std::slice::from_raw_parts(payload_ptr, payload_len);
-    let ad = std::slice::from_raw_parts(ad_ptr, ad_len);
+    let ad = if ad_len > 0 && !ad_ptr.is_null() {
+        std::slice::from_raw_parts(ad_ptr, ad_len)
+    } else {
+        &[]
+    };
 
     // Reconstruct the Message object
     let message = Message {
@@ -154,12 +169,12 @@ pub unsafe extern "C" fn pqa_free_message(msg_ptr: *mut FfiMessage) {
         return;
     }
     let msg = Box::from_raw(msg_ptr);
-    if !msg.header.is_null() {
+    if !msg.header.is_null() && msg.header_len > 0 {
         let header_slice = std::slice::from_raw_parts_mut(msg.header, msg.header_len);
         header_slice.zeroize();
         let _ = Box::from_raw(header_slice as *mut [u8]);
     }
-    if !msg.payload.is_null() {
+    if !msg.payload.is_null() && msg.payload_len > 0 {
         let payload_slice = std::slice::from_raw_parts_mut(msg.payload, msg.payload_len);
         payload_slice.zeroize();
         let _ = Box::from_raw(payload_slice as *mut [u8]);
@@ -172,12 +187,11 @@ pub unsafe extern "C" fn pqa_free_message(msg_ptr: *mut FfiMessage) {
 /// This function is unsafe because it handles raw pointers.
 #[no_mangle]
 pub unsafe extern "C" fn pqa_free_buffer(ptr: *mut u8, len: usize) {
-    if ptr.is_null() {
-        return;
+    if !ptr.is_null() && len > 0 {
+        let slice = std::slice::from_raw_parts_mut(ptr, len);
+        slice.zeroize();
+        let _ = Box::from_raw(slice as *mut [u8]);
     }
-    let slice = std::slice::from_raw_parts_mut(ptr, len);
-    slice.zeroize();
-    let _ = Box::from_raw(slice as *mut [u8]);
 }
 
 // ============================================================================
@@ -222,12 +236,12 @@ pub unsafe extern "C" fn pqa_free_keypair(kp_ptr: *mut FfiKeyPair) {
         return;
     }
     let kp = Box::from_raw(kp_ptr);
-    if !kp.public_key.is_null() {
+    if !kp.public_key.is_null() && kp.public_key_len > 0 {
         let pk_slice = std::slice::from_raw_parts_mut(kp.public_key, kp.public_key_len);
         pk_slice.zeroize();
         let _ = Box::from_raw(pk_slice as *mut [u8]);
     }
-    if !kp.secret_key.is_null() {
+    if !kp.secret_key.is_null() && kp.secret_key_len > 0 {
         let sk_slice = std::slice::from_raw_parts_mut(kp.secret_key, kp.secret_key_len);
         sk_slice.zeroize();
         let _ = Box::from_raw(sk_slice as *mut [u8]);
@@ -325,31 +339,32 @@ pub unsafe extern "C" fn pqa_free_bundle(bundle_ptr: *mut FfiPreKeyBundle) {
         return;
     }
     let bundle = Box::from_raw(bundle_ptr);
-    if !bundle.identity_pk.is_null() {
+    if !bundle.identity_pk.is_null() && bundle.identity_pk_len > 0 {
         let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
             bundle.identity_pk,
             bundle.identity_pk_len,
         ));
     }
-    if !bundle.identity_verifying_key.is_null() {
+    if !bundle.identity_verifying_key.is_null() && bundle.identity_verifying_key_len > 0 {
         let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
             bundle.identity_verifying_key,
             bundle.identity_verifying_key_len,
         ));
     }
-    if !bundle.signed_pre_key.is_null() {
+    if !bundle.signed_pre_key.is_null() && bundle.signed_pre_key_len > 0 {
         let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
             bundle.signed_pre_key,
             bundle.signed_pre_key_len,
         ));
     }
-    if !bundle.signature.is_null() {
+    if !bundle.signature.is_null() && bundle.signature_len > 0 {
         let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
             bundle.signature,
             bundle.signature_len,
         ));
     }
-    if !bundle.one_time_pre_key.is_null() && bundle.has_one_time {
+    if !bundle.one_time_pre_key.is_null() && bundle.has_one_time && bundle.one_time_pre_key_len > 0
+    {
         let _ = Box::from_raw(std::ptr::slice_from_raw_parts_mut(
             bundle.one_time_pre_key,
             bundle.one_time_pre_key_len,
@@ -618,38 +633,57 @@ pub unsafe extern "C" fn pqa_free_initial_message(msg_ptr: *mut FfiInitialMessag
         return;
     }
     let msg = Box::from_raw(msg_ptr);
-    if !msg.alice_identity_pk.is_null() {
-        let slice = std::slice::from_raw_parts_mut(msg.alice_identity_pk, msg.alice_identity_pk_len);
+    if !msg.alice_identity_pk.is_null() && msg.alice_identity_pk_len > 0 {
+        let slice =
+            std::slice::from_raw_parts_mut(msg.alice_identity_pk, msg.alice_identity_pk_len);
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
-    if !msg.ephemeral_pk.is_null() {
+    if !msg.ephemeral_pk.is_null() && msg.ephemeral_pk_len > 0 {
         let slice = std::slice::from_raw_parts_mut(msg.ephemeral_pk, msg.ephemeral_pk_len);
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
-    if !msg.kem_ciphertext_identity.is_null() {
-        let slice = std::slice::from_raw_parts_mut(msg.kem_ciphertext_identity, msg.kem_ciphertext_identity_len);
+    if !msg.kem_ciphertext_identity.is_null() && msg.kem_ciphertext_identity_len > 0 {
+        let slice = std::slice::from_raw_parts_mut(
+            msg.kem_ciphertext_identity,
+            msg.kem_ciphertext_identity_len,
+        );
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
-    if !msg.kem_ciphertext_signed.is_null() {
-        let slice = std::slice::from_raw_parts_mut(msg.kem_ciphertext_signed, msg.kem_ciphertext_signed_len);
+    if !msg.kem_ciphertext_signed.is_null() && msg.kem_ciphertext_signed_len > 0 {
+        let slice = std::slice::from_raw_parts_mut(
+            msg.kem_ciphertext_signed,
+            msg.kem_ciphertext_signed_len,
+        );
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
-    if !msg.kem_ciphertext_one_time.is_null() && msg.has_one_time {
-        let slice = std::slice::from_raw_parts_mut(msg.kem_ciphertext_one_time, msg.kem_ciphertext_one_time_len);
+    if !msg.kem_ciphertext_one_time.is_null()
+        && msg.has_one_time
+        && msg.kem_ciphertext_one_time_len > 0
+    {
+        let slice = std::slice::from_raw_parts_mut(
+            msg.kem_ciphertext_one_time,
+            msg.kem_ciphertext_one_time_len,
+        );
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
-    if !msg.ratchet_message_header.is_null() {
-        let slice = std::slice::from_raw_parts_mut(msg.ratchet_message_header, msg.ratchet_message_header_len);
+    if !msg.ratchet_message_header.is_null() && msg.ratchet_message_header_len > 0 {
+        let slice = std::slice::from_raw_parts_mut(
+            msg.ratchet_message_header,
+            msg.ratchet_message_header_len,
+        );
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
-    if !msg.ratchet_message_payload.is_null() {
-        let slice = std::slice::from_raw_parts_mut(msg.ratchet_message_payload, msg.ratchet_message_payload_len);
+    if !msg.ratchet_message_payload.is_null() && msg.ratchet_message_payload_len > 0 {
+        let slice = std::slice::from_raw_parts_mut(
+            msg.ratchet_message_payload,
+            msg.ratchet_message_payload_len,
+        );
         slice.zeroize();
         let _ = Box::from_raw(slice as *mut [u8]);
     }
@@ -736,4 +770,3 @@ pub unsafe fn check_compliance_notice() {
         );
     }
 }
-

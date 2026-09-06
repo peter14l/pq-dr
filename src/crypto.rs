@@ -512,7 +512,8 @@ impl HybridSigningKey {
         }
         let (classic_bytes, quantum_bytes) = bytes.split_at(32);
         let classic = ed25519_dalek::SigningKey::from_bytes(classic_bytes.try_into().unwrap());
-        let quantum = ml_dsa::SigningKey::<ml_dsa::MlDsa65>::from_seed(quantum_bytes.try_into().unwrap());
+        let quantum =
+            ml_dsa::SigningKey::<ml_dsa::MlDsa65>::from_seed(quantum_bytes.try_into().unwrap());
         Ok(Self { classic, quantum })
     }
 }
@@ -568,7 +569,9 @@ impl HybridVerifyingKey {
         let classic = ed25519_dalek::VerifyingKey::from_bytes(classic_bytes.try_into().unwrap())
             .map_err(|_| "Invalid Ed25519 verifying key")?;
         let quantum = ml_dsa::VerifyingKey::<ml_dsa::MlDsa65>::decode(
-            quantum_bytes.try_into().map_err(|_| "Invalid ML-DSA verifying key length")?
+            quantum_bytes
+                .try_into()
+                .map_err(|_| "Invalid ML-DSA verifying key length")?,
         );
         Ok(Self { classic, quantum })
     }
@@ -593,8 +596,11 @@ impl HybridSignature {
         let (classic_bytes, quantum_bytes) = bytes.split_at(64);
         let classic = ed25519_dalek::Signature::from_bytes(classic_bytes.try_into().unwrap());
         let quantum = ml_dsa::Signature::<ml_dsa::MlDsa65>::decode(
-            quantum_bytes.try_into().map_err(|_| "Invalid ML-DSA signature length")?
-        ).ok_or("Invalid ML-DSA signature")?;
+            quantum_bytes
+                .try_into()
+                .map_err(|_| "Invalid ML-DSA signature length")?,
+        )
+        .ok_or("Invalid ML-DSA signature")?;
         Ok(Self { classic, quantum })
     }
 }

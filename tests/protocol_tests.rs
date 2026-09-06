@@ -167,7 +167,7 @@ fn test_state_persistence() {
         .export_state(&storage_key, &storage_nonce)
         .expect("Failed to export state");
 
-    let imported = RatchetState::import_state(&storage_key, &storage_nonce, &exported)
+    let mut imported = RatchetState::import_state(&storage_key, &storage_nonce, &exported)
         .expect("Failed to import state");
 
     assert_eq!(alice_state.root_key.as_ref(), imported.root_key.as_ref());
@@ -175,6 +175,10 @@ fn test_state_persistence() {
         alice_state.dh_pk.classic.as_bytes(),
         imported.dh_pk.classic.as_bytes()
     );
+    assert!(imported.dh_sk.is_some());
+
+    // Verify ratcheting continues to work on imported state
+    let _msg = RatchetEngine::encrypt(&mut imported, b"post-restore message", b"", &mut rng);
 }
 
 #[cfg(test)]

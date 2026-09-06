@@ -65,7 +65,9 @@ impl HandshakeEngine {
     ) -> Result<(RatchetState, InitialMessage, SecretKeyMaterial), &'static str> {
         // 0. Verify the signature on Bob's signed_pre_key using his identity verifying key
         let signed_pre_key_bytes = bundle.signed_pre_key.to_bytes();
-        bundle.identity_verifying_key.verify(&signed_pre_key_bytes, &bundle.signature)?;
+        bundle
+            .identity_verifying_key
+            .verify(&signed_pre_key_bytes, &bundle.signature)?;
 
         // 1. Generate ephemeral keypair
         let (ephemeral_pk, ephemeral_sk) = crypto::generate_hybrid_keypair(rng);

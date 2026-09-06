@@ -152,7 +152,8 @@ async fn main() {
             created_at TEXT
         )",
         [],
-    ).expect("Failed to create orders table");
+    )
+    .expect("Failed to create orders table");
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS licenses (
@@ -166,7 +167,8 @@ async fn main() {
             FOREIGN KEY(order_id) REFERENCES orders(order_id)
         )",
         [],
-    ).expect("Failed to create licenses table");
+    )
+    .expect("Failed to create licenses table");
 
     let state: SharedState = Arc::new(Mutex::new(Db {
         bundles: HashMap::new(),
@@ -188,7 +190,6 @@ async fn main() {
         .route("/license/verify", post(verify_license))
         .layer(cors)
         .with_state(state);
-
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let addr = format!("0.0.0.0:{}", port);
@@ -409,11 +410,14 @@ async fn razorpay_webhook(
         let mut db = state.lock().unwrap();
 
         // Idempotency guard — ignore replayed webhook deliveries
-        let exists: bool = db.conn.query_row(
-            "SELECT EXISTS(SELECT 1 FROM orders WHERE payment_id = ?)",
-            [&payment_id],
-            |row| row.get(0),
-        ).unwrap_or(false);
+        let exists: bool = db
+            .conn
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM orders WHERE payment_id = ?)",
+                [&payment_id],
+                |row| row.get(0),
+            )
+            .unwrap_or(false);
 
         if exists {
             eprintln!("[webhook] Duplicate payment_id {} — skipping", payment_id);
@@ -501,7 +505,6 @@ async fn razorpay_webhook(
 
     StatusCode::OK
 }
-
 
 // ─────────────────────────────────────────────
 // HMAC-SHA256 signature verification
