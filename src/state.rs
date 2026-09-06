@@ -177,6 +177,7 @@ impl RatchetState {
         path: &std::path::Path,
         encryption_key: &SecretKeyMaterial,
     ) -> Result<(), Box<dyn std::error::Error>> {
+        use rand_core::RngCore;
         use std::io::Write;
 
         // 1. Generate a random nonce for this save
